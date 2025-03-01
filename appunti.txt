@@ -1,7 +1,7 @@
 
 8k (4k?) for revision 2025
 planet-x (working title)
-YR4 (terrible title but reference to the mad asteroid)
+YR4 (terrible title but nice reference to the mad asteroid)
 
 21/02/2025
 
@@ -16,6 +16,24 @@ Opening scene sketched. Seems good enough.
 
 Part 2 with an elevate-esque landscape.
 I'm strangely satisfied with the 4klang music.
+Doing a spaceship.
+
+26/02/2025
+More cameras on spaceship.
+Playing with a new transition, with small results.
+Compresses down to 5654 bytes.
+
+27/02/2025
+Why not a good flare in the spaceship scene?
+https://www.shadertoy.com/view/Xlc3D2
+Integrated the flare, p2 scene looks better with that light haze.
+
+28/02/2025
+It's hard to mantain momentum.
+Hexa fade.
+
+01/03/2025
+Even more hard.
 
 
 
@@ -30,3 +48,6 @@ https://www.shadertoy.com/view/flKcDW
 
 great mountain shader
 https://www.shadertoy.com/view/fddSzl
+
+more godrays to rip
+https://www.shadertoy.com/view/XcKyzV

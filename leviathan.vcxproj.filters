@@ -37,6 +37,12 @@
     <None Include="src\shaders\fragment2.inl">
       <Filter>shaders</Filter>
     </None>
+    <None Include="src\shaders\part3.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="src\shaders\fragment3.inl">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="ext">

@@ -34,6 +34,7 @@
 #include "glext.h"
 #include "shaders/fragment.inl"
 #include "shaders/fragment2.inl"
+#include "shaders/fragment3.inl"
 #include "shaders/post.inl"
 
 #pragma data_seg(".pids")
@@ -41,6 +42,7 @@
 static int pidMain;
 static int pidPost;
 static int pidPart2;
+static int pidPart3;
 
 void drawText(float posx, float posy, char* txt)
 {
@@ -48,9 +50,22 @@ void drawText(float posx, float posy, char* txt)
 	((PFNGLUNIFORM1IPROC)wglGetProcAddress("glUniform1i"))(0, 0);
 	glRasterPos2f(posx,posy);
 	glCallLists(strlen(txt), GL_UNSIGNED_BYTE, txt);
-	glFinish();
+	//glFinish();
 }
 
+void glHex(float x, float y,float k)
+{
+	float ln = k;
+	float angle = 0.0;
+	glBegin(GL_POLYGON);
+	glVertex2f(x+ln,y);
+	glVertex2f(x+(ln*0.4),y+(ln*1.4));
+	glVertex2f(x-(ln*0.4),y+(ln*1.4));
+	glVertex2f(x-ln,y);
+	glVertex2f(x-(ln*0.4),y-(ln*1.4));
+	glVertex2f(x+(ln*0.4),y-(ln*1.4));
+	glEnd();
+}
 
 #ifndef EDITOR_CONTROLS
 #pragma code_seg(".main")
@@ -100,6 +115,7 @@ int __cdecl main(int argc, char* argv[])
 
 	pidMain = ((PFNGLCREATESHADERPROGRAMVPROC)wglGetProcAddress("glCreateShaderProgramv"))(GL_FRAGMENT_SHADER, 1, &fragment);
 	pidPart2= ((PFNGLCREATESHADERPROGRAMVPROC)wglGetProcAddress("glCreateShaderProgramv"))(GL_FRAGMENT_SHADER, 1, &part2);
+	pidPart3= ((PFNGLCREATESHADERPROGRAMVPROC)wglGetProcAddress("glCreateShaderProgramv"))(GL_FRAGMENT_SHADER, 1, &part3);
 	pidPost = ((PFNGLCREATESHADERPROGRAMVPROC)wglGetProcAddress("glCreateShaderProgramv"))(GL_FRAGMENT_SHADER, 1, &post);
 
 	// init font
@@ -122,7 +138,7 @@ int __cdecl main(int argc, char* argv[])
 
 		ShowCursor(0);
 
-		double position = 0.0;
+		unsigned int position;
 		unsigned long startTime = timeGetTime();
 
 		// mainloop
@@ -142,10 +158,6 @@ int __cdecl main(int argc, char* argv[])
 
 			position = timeGetTime() - startTime;
 
-			int curShadah = pidMain;
-			//if (position < 30000) curShadah = pidMain;
-			//((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(curShadah);
-
 #if USE_AUDIO
 			waveOutGetPosition(hWaveOut, &MMTime, sizeof(MMTIME));
 #endif
@@ -160,27 +172,74 @@ int __cdecl main(int argc, char* argv[])
 
 #define FADESTART 28000
 #define FADEEND 32000
+#define FADEP3START 46000
+#define FADEP3END 52000
+#define NUMROWS 24
+
+#define HEXROWS 16
+#define HEXCOLS 10
+#define HEXSTART 10000
+#define HEXEND 10000
 
 			if (p0 < FADESTART)
 			{
 				((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidMain);
-				glTexCoord3i(p0, p1, p2);
+				glTexCoord3i(p0+30000, p1, p2);
 				glRects(-1, -1, 1, 1);
 			}
 			else if ((p0 >= FADESTART) && (p0 < FADEEND))
 			{
+				((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidMain);
+				glTexCoord3i(p0, p1, p2);
+				glRects(-1, -1, 1, 1);
 				((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidPart2);
 				glTexCoord3i(p0, p1, p2);
-				float k = ((((float)p0 - FADESTART) / (FADESTART-FADEEND))*4.0);
+				float k = ((((float)p0 - FADESTART) / (FADESTART-FADEEND))*4.0f);
 				glBegin(GL_TRIANGLES);
-				glVertex2f(0.0,k);
-				glVertex2f(k*0.85, -k*1.3);
-				glVertex2f(-k*0.85, -k*1.3);
+				glVertex2f(0.0f,k);
+				glVertex2f(k*0.85f, -k*1.3f);
+				glVertex2f(-k*0.85f, -k*1.3f);
 				glEnd();
+			}
+			else if (p0<FADEP3START)
+			{
+				((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidPart2);
+				glTexCoord3i(p0, p1, p2);
+				glRects(-1, -1, 1, 1);
+			}
+			else if ((p0 >= FADEP3START) && (p0 < FADEP3END))
+			{
+				glLoadIdentity();
+				((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidPart2);
+				glTexCoord3i(p0, p1, p2);
+				glRects(-1, -1, 1, 1);
+
+				float k = ((((float)p0 - FADEP3START) / (FADEP3START - FADEP3END)));
+
+				((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidPart3);
+				glTexCoord3i(p0, p1, p2);
+
+				float scalefact = 3.0;
+				glScalef(scalefact, scalefact, scalefact);
+
+				float ypos = .4f;
+				for (int r = 0;r < HEXROWS;r++)
+				{
+					float xpos = -0.8f;
+					if ((r % 2) == 1) xpos -= 0.072f;
+					for (int x = 0;x < HEXCOLS;x++)
+					{
+						if ((k / 8.0) > 1.0) k = 8.0f;
+						glHex(xpos, ypos, k / 8.0f);
+						xpos += 0.145f;
+					}
+					ypos -= 0.07f;
+				}
 			}
 			else
 			{
-				((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidPart2);
+				glLoadIdentity();
+				((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidPart3);
 				glTexCoord3i(p0, p1, p2);
 				glRects(-1, -1, 1, 1);
 			}
@@ -188,17 +247,17 @@ int __cdecl main(int argc, char* argv[])
 			typedef struct
 			{
 				float px, py;
-				int positionStart;
-				int positionEnd;
+				unsigned int positionStart;
+				unsigned int positionEnd;
 				char* str;
 			} textTimeline;
 
 #define NUM_TEXTS 3
 			textTimeline tlarr[NUM_TEXTS] =
 			{
-				{0.7f,-0.75f,6000,9000,"F  R  I  O  L"},
+				{0.45f,-0.75f,6000,9000,"R   O   L   L   B   A   C   K"},
 				{-0.95f,0.75f,12000,15000,"@REVISION 2o25"},
-				{-0.2f,0,18000,34000,"P  L  A  N  E  T     X"},
+				{-0.18f,0.02f,18000,33000,"P  L  A  N  E  T     X"},
 			};
 
 			for (unsigned int i = 0;i < NUM_TEXTS;i++)
