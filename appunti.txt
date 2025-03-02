@@ -34,6 +34,9 @@ Hexa fade.
 
 01/03/2025
 Even more hard.
+We're at 6.2k, and a ship appears below the godrays.
+
+02/03/2025
 
 
 
@@ -42,9 +45,6 @@ https://www.shadertoy.com/view/lstfW2
 
 uno forte (short code shaders)
 https://www.shadertoy.com/user/Xor
-
-blue landscape (tiny) (has texture)
-https://www.shadertoy.com/view/flKcDW
 
 great mountain shader
 https://www.shadertoy.com/view/fddSzl

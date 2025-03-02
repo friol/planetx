@@ -56,7 +56,6 @@ void drawText(float posx, float posy, char* txt)
 void glHex(float x, float y,float k)
 {
 	float ln = k;
-	float angle = 0.0;
 	glBegin(GL_POLYGON);
 	glVertex2f(x+ln,y);
 	glVertex2f(x+(ln*0.4),y+(ln*1.4));
@@ -172,8 +171,8 @@ int __cdecl main(int argc, char* argv[])
 
 #define FADESTART 28000
 #define FADEEND 32000
-#define FADEP3START 46000
-#define FADEP3END 52000
+#define FADEP3START 48000
+#define FADEP3END 54000
 #define NUMROWS 24
 
 #define HEXROWS 16
@@ -184,7 +183,7 @@ int __cdecl main(int argc, char* argv[])
 			if (p0 < FADESTART)
 			{
 				((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidMain);
-				glTexCoord3i(p0+30000, p1, p2);
+				glTexCoord3i(p0, p1, p2);
 				glRects(-1, -1, 1, 1);
 			}
 			else if ((p0 >= FADESTART) && (p0 < FADEEND))
@@ -219,8 +218,7 @@ int __cdecl main(int argc, char* argv[])
 				((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidPart3);
 				glTexCoord3i(p0, p1, p2);
 
-				float scalefact = 3.0;
-				glScalef(scalefact, scalefact, scalefact);
+				glScalef(3.0, 3.0, 3.0);
 
 				float ypos = .4f;
 				for (int r = 0;r < HEXROWS;r++)
@@ -229,7 +227,7 @@ int __cdecl main(int argc, char* argv[])
 					if ((r % 2) == 1) xpos -= 0.072f;
 					for (int x = 0;x < HEXCOLS;x++)
 					{
-						if ((k / 8.0) > 1.0) k = 8.0f;
+						if ((k / 8.0f) > 1.0f) k = 1.0f;
 						glHex(xpos, ypos, k / 8.0f);
 						xpos += 0.145f;
 					}
@@ -252,12 +250,13 @@ int __cdecl main(int argc, char* argv[])
 				char* str;
 			} textTimeline;
 
-#define NUM_TEXTS 3
+#define NUM_TEXTS 4
 			textTimeline tlarr[NUM_TEXTS] =
 			{
-				{0.45f,-0.75f,6000,9000,"R   O   L   L   B   A   C   K"},
+				{0.65f,-0.75f,6000,9000,"F   R   I   O   L"},
 				{-0.95f,0.75f,12000,15000,"@REVISION 2o25"},
 				{-0.18f,0.02f,18000,33000,"P  L  A  N  E  T     X"},
+				{0.3f,0.075f,56000,57000,"SPINNING KIDS"},
 			};
 
 			for (unsigned int i = 0;i < NUM_TEXTS;i++)
