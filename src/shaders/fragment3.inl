@@ -163,7 +163,7 @@ const char* part3 =
      "{"
        "vec2 S=vec2(0,o)/float(2)-.5,e=(gl_FragCoord.xy+S-.5*d.xy)/d.y;"
        "e.y+=.2;"
-       "if(y<48+2*PI)"
+       "if(y<50+2*PI)"
          "e.x-=-2.5+2*sin(y/4);"
        "else"
          " e.x+=.5;"

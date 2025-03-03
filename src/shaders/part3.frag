@@ -219,7 +219,7 @@ void main()
 
         vec2 uv = (gl_FragCoord.xy+offs-.5*iResolution.xy)/iResolution.y;
         uv.y+=.2;
-        if (iTime<(48+2.0*PI)) uv.x-=-2.5+2.*sin(iTime/4.0);
+        if (iTime<(50+2.0*PI)) uv.x-=-2.5+2.*sin(iTime/4.0);
         else uv.x+=0.5;
 
         vec3 rd = R(uv, ro, vec3(0,0,0), 1.);

@@ -157,7 +157,6 @@ float Hash21(vec2 p){
     return fract(p.x*p.y);
 }
 
-
 vec3 StarLayer(vec2 uv,float iTime)
 {
     vec3 col = vec3(0);
@@ -214,6 +213,13 @@ void main()
     float atmos = 0.0;
 
     vec3 loc = src;
+
+    if (iTime>78) 
+    {
+        src = vec3(8. * (gl_FragCoord.xy - 0.5*iResolution.xy) / iResolution.yy, 3.0);
+        dir = vec3(0., 0., -1.21);
+    }
+
     float value;
     int steps = 0;
     for (int i=0; i < 256; i++) 
@@ -247,5 +253,9 @@ void main()
     if (iTime<3.)
     {
         o*=(iTime/3);
+    }
+    else if (iTime>=88)
+    {
+        o*=((89/4.-iTime/4.))>0?((89/4.-iTime/4.)):0;
     }
 }

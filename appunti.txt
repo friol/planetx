@@ -20,7 +20,7 @@ Doing a spaceship.
 
 26/02/2025
 More cameras on spaceship.
-Playing with a new transition, with small results.
+Playing with a new transition, with poor results.
 Compresses down to 5654 bytes.
 
 27/02/2025
@@ -37,6 +37,7 @@ Even more hard.
 We're at 6.2k, and a ship appears below the godrays.
 
 02/03/2025
+"finished" the music. 6.7k.
 
 
 

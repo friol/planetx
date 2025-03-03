@@ -2,8 +2,8 @@
 //
 // going mini
 // friol 2o25
-// - for size optimization: study NO_UNIFORM
-// - part 2
+// * for size optimization: study NO_UNIFORM
+// * part 2
 // - experiment with more typefaces
 //
 
@@ -171,10 +171,11 @@ int __cdecl main(int argc, char* argv[])
 
 #define FADESTART 28000
 #define FADEEND 32000
-#define FADEP3START 48000
-#define FADEP3END 54000
+#define FADEP3START 50000
+#define FADEP3END 56000
+#define REALFADEP3END 53000
+#define PART4START 78000
 #define NUMROWS 24
-
 #define HEXROWS 16
 #define HEXCOLS 10
 #define HEXSTART 10000
@@ -206,14 +207,14 @@ int __cdecl main(int argc, char* argv[])
 				glTexCoord3i(p0, p1, p2);
 				glRects(-1, -1, 1, 1);
 			}
-			else if ((p0 >= FADEP3START) && (p0 < FADEP3END))
+			else if ((p0 >= FADEP3START) && (p0 < REALFADEP3END))
 			{
 				glLoadIdentity();
 				((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidPart2);
 				glTexCoord3i(p0, p1, p2);
 				glRects(-1, -1, 1, 1);
 
-				float k = ((((float)p0 - FADEP3START) / (FADEP3START - FADEP3END)));
+				float k = ((((float)p0 - FADEP3START) / (FADEP3END - FADEP3START)));
 
 				((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidPart3);
 				glTexCoord3i(p0, p1, p2);
@@ -227,17 +228,22 @@ int __cdecl main(int argc, char* argv[])
 					if ((r % 2) == 1) xpos -= 0.072f;
 					for (int x = 0;x < HEXCOLS;x++)
 					{
-						if ((k / 8.0f) > 1.0f) k = 1.0f;
 						glHex(xpos, ypos, k / 8.0f);
 						xpos += 0.145f;
 					}
 					ypos -= 0.07f;
 				}
 			}
-			else
+			else if ((p0>=REALFADEP3END)&&(p0<PART4START))
 			{
 				glLoadIdentity();
 				((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidPart3);
+				glTexCoord3i(p0, p1, p2);
+				glRects(-1, -1, 1, 1);
+			}
+			else
+			{
+				((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidMain);
 				glTexCoord3i(p0, p1, p2);
 				glRects(-1, -1, 1, 1);
 			}
@@ -250,18 +256,33 @@ int __cdecl main(int argc, char* argv[])
 				char* str;
 			} textTimeline;
 
-#define NUM_TEXTS 4
+#define NUM_TEXTS 19
 			textTimeline tlarr[NUM_TEXTS] =
 			{
 				{0.65f,-0.75f,6000,9000,"F   R   I   O   L"},
 				{-0.95f,0.75f,12000,15000,"@REVISION 2o25"},
-				{-0.18f,0.02f,18000,33000,"P  L  A  N  E  T     X"},
-				{0.3f,0.075f,56000,57000,"SPINNING KIDS"},
+				{-0.18f,0.02f,18000,30000,"P  L  A  N  E  T     X"},
+				{0.5f,0.8f,55000,76000,"FLY WITH US:"},
+				{0.5f,0.7f,56000,76000,"SPINNING KIDS"},
+				{0.5f,0.6f,57000,76000,"DEATHSTAR"},
+				{0.5f,0.5f,58000,76000,"DARKAGE"},
+				{0.5f,0.4f,59000,76000,"MERCURY"},
+				{0.5f,0.3f,60000,76000,"CONSPIRACY"},
+				{0.5f,0.2f,61000,76000,"FUTURE CREW"},
+				{0.5f,0.1f,62000,76000,"ASD"},
+				{0.5f,0.0f,63000,76000,"RGBA"},
+				{0.5f,-0.1f,64000,76000,"TBL"},
+				{0.5f,-0.2f,65000,76000,"JAPOTEK"},
+				{0.5f,-0.3f,66000,76000,"RITUAL"},
+				{0.5f,-0.4f,67000,76000,"ZERO DEFECTS"},
+				{0.5f,-0.5f,68000,76000,"PAN"},
+				{0.5f,-0.6f,69000,76000,"PELLICU$"},
+				{0.5f,-0.7f,70000,76000,"FIZZER"},
 			};
 
 			for (unsigned int i = 0;i < NUM_TEXTS;i++)
 			{
-				if ((position >= tlarr[i].positionStart) && (position < tlarr[i].positionEnd))
+				if ((p0 >= tlarr[i].positionStart) && (p0 < tlarr[i].positionEnd))
 				{
 					drawText(tlarr[i].px,tlarr[i].py,tlarr[i].str);
 				}
