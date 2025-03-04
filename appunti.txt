@@ -39,7 +39,21 @@ We're at 6.2k, and a ship appears below the godrays.
 02/03/2025
 "finished" the music. 6.7k.
 
+03/03/2025
+A day I will remember. 
+We start at 7097. 6972. 6504.
+6211.
 
+04/03/2025
+Switched to the latest version of shader minifier.
+6171. 6164 (latest version of crinkler).
+6112. Removed shader 3: 6060 (nice number).
+6099 (!). 6073. 6034. 5999 (lol). 5988.
+
+
+
+smaller lens flare
+https://www.shadertoy.com/view/dllSRX
 
 blue planet with glow (short)
 https://www.shadertoy.com/view/lstfW2

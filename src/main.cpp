@@ -34,23 +34,20 @@
 #include "glext.h"
 #include "shaders/fragment.inl"
 #include "shaders/fragment2.inl"
-#include "shaders/fragment3.inl"
-#include "shaders/post.inl"
 
 #pragma data_seg(".pids")
 // static allocation saves a few bytes
 static int pidMain;
-static int pidPost;
 static int pidPart2;
-static int pidPart3;
 
 void drawText(float posx, float posy, char* txt)
 {
-	((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidPost);
-	((PFNGLUNIFORM1IPROC)wglGetProcAddress("glUniform1i"))(0, 0);
+	//((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidPost);
+	//((PFNGLUNIFORM1IPROC)wglGetProcAddress("glUniform1i"))(0, 0);
+	((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(0);
+	glColor3f(1.0, 1.0, 1.0);
 	glRasterPos2f(posx,posy);
 	glCallLists(strlen(txt), GL_UNSIGNED_BYTE, txt);
-	//glFinish();
 }
 
 void glHex(float x, float y,float k)
@@ -75,6 +72,9 @@ void entrypoint(void)
 int __cdecl main(int argc, char* argv[])
 #endif
 {
+	int p1 = GetSystemMetrics(SM_CXSCREEN);
+	int p2 = GetSystemMetrics(SM_CYSCREEN);
+
 	// initialize window
 	#if FULLSCREEN
 		ChangeDisplaySettings(&screenSettings, CDS_FULLSCREEN);
@@ -82,8 +82,7 @@ int __cdecl main(int argc, char* argv[])
 		const HDC hDC = GetDC(CreateWindow((LPCSTR)0xC018, 0, WS_POPUP | WS_VISIBLE | WS_MAXIMIZE, 0, 0, 0, 0, 0, 0, 0, 0));
 	#else
 		#ifdef EDITOR_CONTROLS
-			HWND window = CreateWindow("static", 0, WS_POPUP | WS_VISIBLE, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN),
-				0, 0, 0, 0);
+			HWND window = CreateWindow("static", 0, WS_POPUP | WS_VISIBLE, 0, 0, p1, p2, 0, 0, 0, 0);
 			HDC hDC = GetDC(window);
 		#else
 			// you can create a pseudo fullscreen window by similarly enabling the WS_MAXIMIZE flag as above
@@ -101,7 +100,7 @@ int __cdecl main(int argc, char* argv[])
 #ifdef EDITOR_CONTROLS
 	int result = 0;
 	const int debugid = ((PFNGLCREATESHADERPROC)wglGetProcAddress("glCreateShader"))(GL_FRAGMENT_SHADER);
-	((PFNGLSHADERSOURCEPROC)wglGetProcAddress("glShaderSource"))(debugid, 1, &part2, 0);
+	((PFNGLSHADERSOURCEPROC)wglGetProcAddress("glShaderSource"))(debugid, 1, &part2_frag, 0);
 	((PFNGLCOMPILESHADERPROC)wglGetProcAddress("glCompileShader"))(debugid);
 	((PFNGLGETSHADERIVPROC)wglGetProcAddress("glGetShaderiv"))(debugid, GL_COMPILE_STATUS, &result);
 	if (result == GL_FALSE)
@@ -112,10 +111,8 @@ int __cdecl main(int argc, char* argv[])
 	}
 #endif 
 
-	pidMain = ((PFNGLCREATESHADERPROGRAMVPROC)wglGetProcAddress("glCreateShaderProgramv"))(GL_FRAGMENT_SHADER, 1, &fragment);
-	pidPart2= ((PFNGLCREATESHADERPROGRAMVPROC)wglGetProcAddress("glCreateShaderProgramv"))(GL_FRAGMENT_SHADER, 1, &part2);
-	pidPart3= ((PFNGLCREATESHADERPROGRAMVPROC)wglGetProcAddress("glCreateShaderProgramv"))(GL_FRAGMENT_SHADER, 1, &part3);
-	pidPost = ((PFNGLCREATESHADERPROGRAMVPROC)wglGetProcAddress("glCreateShaderProgramv"))(GL_FRAGMENT_SHADER, 1, &post);
+	pidMain = ((PFNGLCREATESHADERPROGRAMVPROC)wglGetProcAddress("glCreateShaderProgramv"))(GL_FRAGMENT_SHADER, 1, &fragment_frag);
+	pidPart2= ((PFNGLCREATESHADERPROGRAMVPROC)wglGetProcAddress("glCreateShaderProgramv"))(GL_FRAGMENT_SHADER, 1, &part2_frag);
 
 	// init font
 	const HFONT mainFont = CreateFont(45, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ANTIALIASED_QUALITY, 0, "Tahoma");
@@ -137,7 +134,6 @@ int __cdecl main(int argc, char* argv[])
 
 		ShowCursor(0);
 
-		unsigned int position;
 		unsigned long startTime = timeGetTime();
 
 		// mainloop
@@ -155,7 +151,7 @@ int __cdecl main(int argc, char* argv[])
 			PeekMessage(0, 0, 0, 0, PM_REMOVE);
 #endif
 
-			position = timeGetTime() - startTime;
+			int p0 = timeGetTime() - startTime;//+27000;
 
 #if USE_AUDIO
 			waveOutGetPosition(hWaveOut, &MMTime, sizeof(MMTIME));
@@ -164,10 +160,6 @@ int __cdecl main(int argc, char* argv[])
 #if NO_UNIFORMS
 			glColor3ui(MMTime.u.sample, 0, 0);
 #endif
-
-			int p0 = position;
-			int p1 = GetSystemMetrics(SM_CXSCREEN);
-			int p2 = GetSystemMetrics(SM_CYSCREEN);
 
 #define FADESTART 28000
 #define FADEEND 32000
@@ -216,10 +208,10 @@ int __cdecl main(int argc, char* argv[])
 
 				float k = ((((float)p0 - FADEP3START) / (FADEP3END - FADEP3START)));
 
-				((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidPart3);
-				glTexCoord3i(p0, p1, p2);
+				//((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidPart2);
+				glTexCoord3i(-p0, p1, p2);
 
-				glScalef(3.0, 3.0, 3.0);
+				glScalef(3,3,3);
 
 				float ypos = .4f;
 				for (int r = 0;r < HEXROWS;r++)
@@ -237,8 +229,8 @@ int __cdecl main(int argc, char* argv[])
 			else if ((p0>=REALFADEP3END)&&(p0<PART4START))
 			{
 				glLoadIdentity();
-				((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidPart3);
-				glTexCoord3i(p0, p1, p2);
+				((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidPart2);
+				glTexCoord3i(-p0, p1, p2);
 				glRects(-1, -1, 1, 1);
 			}
 			else
@@ -256,7 +248,7 @@ int __cdecl main(int argc, char* argv[])
 				char* str;
 			} textTimeline;
 
-#define NUM_TEXTS 19
+#define NUM_TEXTS 20
 			textTimeline tlarr[NUM_TEXTS] =
 			{
 				{0.65f,-0.75f,6000,9000,"F   R   I   O   L"},
@@ -278,6 +270,7 @@ int __cdecl main(int argc, char* argv[])
 				{0.5f,-0.5f,68000,76000,"PAN"},
 				{0.5f,-0.6f,69000,76000,"PELLICU$"},
 				{0.5f,-0.7f,70000,76000,"FIZZER"},
+				{0.5f,-0.8f,71000,76000,"AND YOU"},
 			};
 
 			for (unsigned int i = 0;i < NUM_TEXTS;i++)
@@ -311,7 +304,7 @@ int __cdecl main(int argc, char* argv[])
 				editor.endFrame(timeGetTime());
 				//position = editor.handleEvents(&track, position);
 				editor.printFrameStatistics();
-				editor.updateShaders(&pidMain, &pidPost);
+				//editor.updateShaders(&pidMain, &pidPost);
 			#endif
 	} 
 	while(!GetAsyncKeyState(VK_ESCAPE)

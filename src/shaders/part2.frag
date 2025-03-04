@@ -1,81 +1,95 @@
 #version 130
 out vec4 o;
 #define nm normalize
+#define glf gl_FragCoord
+#define ss smoothstep
+#define lt length
 
-#define PI 3.141592
-#define MAX_STEPS 300
-#define MAX_DIST 256.
-#define SURF_DIST .001
+float iTime = gl_TexCoord[0].x/1000;
+vec2 iResolution=vec2(gl_TexCoord[0].y,gl_TexCoord[0].z);
 
-mat2 shipRot(float a) 
+// bsky
+
+vec2 bskygrad( ivec2 z )
 {
-    float s = sin(a);
-    float c = cos(a);
-    return mat2(c, -s, s, c);
+    int n = z.x+z.y*21111;
+    n = (n<<13)^n;
+    float g=(n*(n*n*15+21)+19)>>16;
+    return vec2(cos(g),sin(g));
 }
 
-float rounding( in float d, in float h )
+float bskynoise(vec2 p)
 {
-    return d - h;
+    ivec2 i = ivec2(floor( p ));
+    vec2 f =       fract( p );
+	vec2 u = f*f*(3.0-2.0*f);
+    return mix( mix( dot( bskygrad( i+ivec2(0,0) ), f-vec2(0.0,0.0) ), 
+                     dot( bskygrad( i+ivec2(1,0) ), f-vec2(1.0,0.0) ), u.x),
+                mix( dot( bskygrad( i+ivec2(0,1) ), f-vec2(0.0,1.0) ), 
+                     dot( bskygrad( i+ivec2(1,1) ), f-vec2(1.0,1.0) ), u.x), u.y);
 }
 
-float opUnion( float d1, float d2 )
+vec4 bskyFun()
 {
-    return min(d1,d2);
+    vec2 p = (2.*glf.xy - iResolution.xy) / iResolution.y;
+    
+    vec3 c; float f,w; vec2 fp;
+    for(float i = 0.; i < 70.;i++) {        
+      
+        fp = 16. * p*i*.002/(p.y+1.8);
+        fp.x += iTime*.5;
+
+        mat2 m = mat2( 1.6,  1.2, -1.2,  1.6 );
+        f  = .5*bskynoise(fp); fp = m*fp*1.1;
+		f += .25*bskynoise(fp); fp*=m;
+        f += .125*bskynoise(fp); fp*=m;
+        f = ss(-.04,.7,f);
+        w += f;
+    }
+    w /= 59.5;
+    
+    vec3 col = mix(
+        vec3(ss(-.11,1.1,w)),
+        vec3(6.,2.,.5), ss(.05,1.,w));  
+ 
+    vec2 uv = glf.xy/iResolution.xy;
+    vec2 n = uv*(1. - uv) * 6.;
+    col *= pow(n.x*n.y,.5);
+    return vec4(col*2.,0)*vec4(0.82,1.5,2.5,1.0);
 }
+
+
+// ship
 
 float opSmoothUnion( float d1, float d2, float k )
 {
     float h = max(k-abs(d1-d2),0.0);
-    return min(d1, d2) - h*h*0.25/k;
+    return min(d1, d2) - h*h*5.;
 }
 
-float sdCircle( in vec3 p, in float r )
-{
-	return length(p)-r;
-}
-float sdCappedCylinder( vec3 p, float h, float r )
-{
-  vec2 d = abs(vec2(length(p.xz),p.y)) - vec2(h,r);
-  return min(max(d.x,d.y),0.0) + length(max(d,0.0));
-}
 float ndot(vec2 a, vec2 b ) { return a.x*b.x - a.y*b.y; }
-float sdRhombus(vec3 p, float la, float lb, float h, float ra)
+float sdRhombus(vec3 p)
 {
   p = abs(p);
-  vec2 b = vec2(la,lb);
+  vec2 b = vec2(.53,.33);
   float f = clamp( (ndot(b,b-2.0*p.xz))/dot(b,b), -1.0, 1.0 );
-  vec2 q = vec2(length(p.xz-0.5*b*vec2(1.0-f,1.0+f))*sign(p.x*b.y+p.z*b.x-b.x*b.y)-ra, p.y-h);
-  return min(max(q.x,q.y),0.0) + length(max(q,0.0));
+  vec2 q = vec2(lt(p.xz-0.5*b*vec2(1.0-f,1.0+f))*sign(p.x*b.y+p.z*b.x-b.x*b.y)-.2, p.y-.015);
+  return min(max(q.x,q.y),0.0) + lt(max(q,0.0));
 }
 
 float sdEllipsoid( vec3 p, vec3 r )
 {
-  float k0 = length(p/r);
-  float k1 = length(p/(r*r));
+  float k0 = lt(p/r);
+  float k1 = lt(p/(r*r));
   return k0*(k0-1.0)/k1;
 }
 
-float createReactor(vec3 p, float rad, float len){
-
-	p = vec3(p.x, p.y, abs(p.z)-0.5);
-	float reactor1 = sdCappedCylinder(p, rad-0.02, len);
-	reactor1 = rounding(reactor1, 0.02);
-	vec3 q = p;
-
-	q += vec3(.0,-len,.0);
-	float fire = sdCircle(q, 0.6 * rad);
-	reactor1 = opUnion(reactor1, fire);
-	return reactor1;
-}
-
-float map(in vec3 pos, out int material)
+float map(vec3 pos)
 {
 	vec3 q = pos;
 
     //LinkBetweenReactors
-	float link = sdRhombus(q, .53, 0.33, 0.015, 0.2 );
-	//float link = opSmoothUnion(core, reactor, 0.1);
+	float link = sdRhombus(q);
  
 	//Core 
 	q = pos + vec3(0.0,0.,-0.4);
@@ -85,7 +99,7 @@ float map(in vec3 pos, out int material)
     //Cockpit
 	q = pos + vec3(0.0,-0.1,-0.12);
 	float cockpit = sdEllipsoid(q, vec3(0.1,0.1,0.42));
-	link = opUnion(cockpit, link);
+	link = min(cockpit, link);
 	
 	q = pos + vec3(0.75,0.0,0.);
 	float leftengine = sdEllipsoid(q, vec3(0.07,0.07,0.5));
@@ -98,39 +112,37 @@ float map(in vec3 pos, out int material)
     return link;
 }
 
-vec2 RayMarch(vec3 ro, vec3 rd, out int mat) {
-	float dO=0.;
-    float dM=MAX_DIST;
-    for(int i=0; i<MAX_STEPS; i++) {
+vec2 RayMarch(vec3 ro, vec3 rd) {
+	float dO=0;
+    float dM=256;
+    for(int i=0; i<300; i++) {
     	vec3 p = ro + rd*dO;
-        float dS = map(p,mat);
+        float dS = map(p);
         if(dS<dM) dM = dS;
         dO += dS;
-        if(dO>MAX_DIST || abs(dS)<SURF_DIST) break;
+        if(dO>256 || abs(dS)<.001) break;
     }
     
     return vec2(dO, dM);
 }
 
-vec3 GetNormal(vec3 p) {
-    int mat = 0;
-	float d = map(p,mat);
-    vec2 e = vec2(.001, 0);
-    vec3 n = d - vec3(
-        map(p-e.xyy,mat),
-        map(p-e.yxy,mat),
-        map(p-e.yyx,mat));
-    
-    return normalize(n);
+vec3 GetNormal(vec3 p) 
+{
+    vec2 e = vec2(.001,0);
+    vec3 n = map(p) - vec3(
+        map(p-e.xyy),
+        map(p-e.yxy),
+        map(p-e.yyx));
+    return nm(n);
 }
 
 vec3 R(vec2 uv, vec3 p, vec3 l, float z) {
-    vec3 f = normalize(l-p),
-        r = normalize(cross(vec3(0,1,0), f)),
+    vec3 f = nm(l-p),
+        r = nm(cross(vec3(0,1,0), f)),
         u = cross(f,r),
         c = p+f*z,
         i = c + uv.x*r + uv.y*u,
-        d = normalize(i-p);
+        d = nm(i-p);
     return d;
 }
 
@@ -138,13 +150,12 @@ vec3 R(vec2 uv, vec3 p, vec3 l, float z) {
 
 mat2 rot(float a) 
 {
-	return mat2(cos(a),sin(a),-sin(a),cos(a));	
+	return mat2(cos(a),-sin(a),sin(a),cos(a));	
 }
-
-vec3 l = vec3(1.);
 
 vec2 field(in vec3 p) 
 {
+    vec3 l = vec3(1.);
 	float s=2.,e,f,o;
 	for(e=f=p.y;s<8e2;s*=1.6)
             p.xz*=rot(s),
@@ -157,28 +168,26 @@ vec2 field(in vec3 p)
 vec4 landScape( in vec3 ro, vec3 rd )
 {
     float t = 2.5;
-    float dt = .031;//+0.02*sin(iTime);
-    vec3 col= vec3(0.);
+    float dt = .031;
+    vec3 col;
     for( int i=0; i<80; i++ )
 	{                
         vec2 v = field(ro+t*rd);  
         float c=v.x, f=v.y;
         t+=dt*f;
         dt *= 1.03;
-        col = .95*col+ .09*vec3(c*c*c, c*c, c);	
+        col = .95*col+ .09*vec3(c*c*c,c*c,c);	
     }
-    
     return vec4(col,t);
 }
 
 vec4 doLandscape(vec2 p,vec2 q,vec3 rols)
 {
-    float iTime = gl_TexCoord[0].x/1000;
-    vec3 ta = vec3( 0.0 , 0.0, 0.0 );
-    vec3 ww = normalize( ta - rols );
-    vec3 uu = normalize( cross(ww,vec3(0.0,1.0,0.0) ) );
-    vec3 vv = normalize( cross(uu,ww));
-    vec3 rd = normalize( p.x*uu + p.y*vv + 2.0*ww );
+    vec3 ta;
+    vec3 ww = nm( ta - rols );
+    vec3 uu = nm( cross(ww,vec3(0,1,0) ) );
+    vec3 vv = nm( cross(uu,ww));
+    vec3 rd = nm( p.x*uu + p.y*vv + 2.0*ww );
     rols.z -=iTime*.4;
 
     vec4 lss=landScape(rols,rd);
@@ -190,104 +199,67 @@ vec4 doLandscape(vec2 p,vec2 q,vec3 rols)
 
 // lens flare
 
-
-float rnd(vec2 p)
-{
-    float f = fract(sin(dot(p, vec2(12.1234, 72.8392) )*45123.2));
- return f;   
-}
-
 float rnd(float w)
 {
-    float f = fract(sin(w)*1000.);
- return f;   
+    return fract(sin(w)*1000.);
 }
 
-float regShape(vec2 p, int N)
+float regShape(vec2 p,float N)
 {
- float f;
-    
-    
-float a=atan(p.x,p.y)+.2;
-float b=6.28319/float(N);
-f=smoothstep(.5,.51, cos(floor(.5+a/b)*b-a)*length(p.xy));
-    
-    
-    return f;
+    float a=atan(p.x,p.y)+.2;
+    float b=6.2/N;
+    return ss(.5,.51, cos(floor(.5+a/b)*b-a)*lt(p.xy));
 }
 
 vec3 circle(vec2 p, float size, float decay, vec3 color,vec3 color2, float dist, vec2 mouse)
 {
-    float l = length(p + mouse*(dist*4.))+size/2.;
+    float l = lt(p + mouse*(dist*4.))+size/2.;
     
     //l2 is used in the rings as well...somehow...
-    float l2 = length(p + mouse*(dist*4.))+size/3.;
+    float l2 = lt(p + mouse*(dist*4.))+size/3.;
     
     ///these are circles, big, rings, and  tiny respectively
-    float c = max(0.01-pow(length(p + mouse*dist), size*1.4), 0.0)*50.;
+    float c = max(0.01-pow(lt(p + mouse*dist), size*1.4), 0.0)*50.;
     float c1 = max(0.001-pow(l-0.3, 1./40.)+sin(l*30.), 0.0)*3.;
-    float c2 =  max(0.04/pow(length(p-mouse*dist/2. + 0.09)*1., 1.), 0.0)/20.;
-    float s = max(0.01-pow(regShape(p*5. + mouse*dist*5. + 0.9, 6) , 1.), 0.0)*5.;
+    float c2 =  max(0.04/pow(lt(p-mouse*dist/2. + 0.09)*1., 1.), 0.0)/20.;
+    float s = max(0.01-pow(regShape(p*5. + mouse*dist*5. + 0.9, 6),1), 0.0)*5.;
     
-   	color = 0.5+0.5*sin(color);
-    color = cos(vec3(0.44, .24, .2)*8. + dist*4.)*0.5+.5;
- 	vec3 f = c*color ;
-    f += c1*color;
-    
-    f += c2*color;  
-    f +=  s*color;
-    return f-0.01;
-}
-
-float sun(vec2 p, vec2 mouse)
-{
- float f;
-    
-    vec2 sunp = p+mouse;
-    float sun = 1.0-length(sunp)*8.;
-    return f;
+   	color = .5*sin(color);
+    color = cos(vec3(0.44, .24, .2)*8. + dist*4.)*0.5+1;
+ 	return c*color + c1*color+ c2*color+ s*color-0.01;
 }
 
 #define part3start 42.
 
-void doFlare( out vec4 fragColor, in vec2 fragCoord )
+void doFlare( out vec4 fragColor, vec2 fragCoord )
 {
-    float iTime = gl_TexCoord[0].x/1000;
-    vec2 iResolution=vec2(gl_TexCoord[0].y,gl_TexCoord[0].z);
 	vec2 uv = fragCoord.xy / iResolution.xy-0.5;
-    //uv=uv*2.-1.0;
     uv.x*=iResolution.x/iResolution.y;
     
-    vec2 mm = vec2(-.6+.02*sin(iTime),.3+.02*sin(iTime));
-    if (iTime>=part3start) mm = vec2(-.6+.02*sin(iTime),.6+.02*sin(iTime));
+    float si=sin(iTime);
+    vec2 mm = vec2(-.6+.02*si,.3+.02*si);
+    if (iTime>=part3start) mm = vec2(-.6+.02*si,.6+.02*si);
     
-    vec3 circColor = vec3(0.9, 0.2, 0.1);
-    vec3 circColor2 = vec3(0.3, 0.1, 0.9);
-    
-    vec3 color = mix(vec3(0.3, 0.2, 0.02)/0.9, vec3(0.2, 0.5, 0.8), uv.y)*3.-0.52*sin(iTime);
+    vec3 color = mix(vec3(0.3, 0.2, 0.02)/0.9, vec3(0.2, 0.5, 0.8), uv.y)*3.-0.52*si;
     
     //this calls the function which adds three circle types every time through the loop based on parameters I
     //got by trying things out. rnd i*2000. and rnd i*20 are just to help randomize things more
     for(float i=0.;i<10.;i++){
-        color += circle(uv, pow(rnd(i*2000.)*1.8, 2.)+1.41, 0.0, circColor+i , circColor2+i, rnd(i*20.)*3.+0.2-.5, mm);
+        color += circle(uv, pow(rnd(i*2000.)*1.8, 2.)+1.41, 0.0, vec3(0.9, 0.2, 0.1)+i , vec3(0.3, 0.1, 0.9)+i, rnd(i*20.)*3.+0.2-.5, mm);
     }
     //get angle and length of the sun (uv - mouse)
-        float a = atan(uv.y-mm.y, uv.x-mm.x);
-    	float l = max(1.0-length(uv-mm)-0.84, 0.0);
-    
-    float bright = 0.1;//+0.1/abs(sin(iTime/3.))/3.;//add brightness based on how the sun moves so that it is brightest
-    //when it is lined up with the center
+    float a = atan(uv.y-mm.y, uv.x-mm.x);
+    float l = max(1.0-lt(uv-mm)-0.84, 0.0);
     
     //add the sun with the frill things
-    color += max(0.1/pow(length(uv-mm)*5., 5.), 0.0)*abs(sin(a*5.+cos(a*9.)))/20.;
-    color += max(0.1/pow(length(uv-mm)*10., 1./20.), .0)+abs(sin(a*3.+cos(a*9.)))/8.*(abs(sin(a*9.)))/1.;
+    color += max(0.1/pow(lt(uv-mm)*5., 5.), 0.0)*abs(sin(a*5.+cos(a*9.)))/20.;
+    color += max(0.1/pow(lt(uv-mm)*10., 1./20.), .0)+abs(sin(a*3.+cos(a*9.)))/8.*(abs(sin(a*9.)))/1.;
     //add another sun in the middle (to make it brighter)  with the20color I want, and bright as the numerator.
-    color += (max(bright/pow(length(uv-mm)*4., 1./2.), 0.0)*4.)*vec3(0.2, 0.21, 0.3)*4.;
-       // * (0.5+.5*sin(vec3(0.4, 0.2, 0.1) + vec3(a*2., 00., a*3.)+1.3));
+    color += (max(.1/pow(lt(uv-mm)*4., 1./2.), 0.0)*4.)*vec3(0.8, 0.84, 1.2);
     	
-    //multiply by the exponetial e^x ? of 1.0-length which kind of masks the brightness more so that
+    //multiply by the exponetial e^x ? of 1.0-lt which kind of masks the brightness more so that
     //there is a sharper roll of of the light decay from the sun. 
-        color*= exp(1.0-length(uv-mm))/5.;
+    color*= exp(1.0-lt(uv-mm))/5.;
 	fragColor = vec4(color,1.0);
 }
 
@@ -299,10 +271,10 @@ void doFlare( out vec4 fragColor, in vec2 fragCoord )
 
 void main()
 {
-    float iTime = gl_TexCoord[0].x/1000;
-    vec2 iResolution=vec2(gl_TexCoord[0].y,gl_TexCoord[0].z);
+    // bluesky
+    if (iTime<0) { iTime=-iTime; o=bskyFun(); return; }
 
-    vec2 q = gl_FragCoord.xy / iResolution.xy;
+    vec2 q = glf.xy / iResolution.xy;
     vec2 pl=-1.0 + 2.0 * q;
     if (iTime>=part2start) pl=-1.620 +2.725 * q;
     pl.x *= iResolution.x/iResolution.y;
@@ -311,22 +283,22 @@ void main()
     if (iTime>=part2start) rols= vec3(2.1,1.1,-2.);
     if (iTime>=part3start) rols= vec3(0.0,3.1,0.1);
 
-    vec4 lscapeCol=doLandscape(pl,q,rols);
+    o=doLandscape(pl,q,rols);
+
+    //
     
     vec2 m = vec2(0.5,0.68); // p1
     if (iTime>=part2start) m= vec2(-.44,.49);
     if (iTime>=part3start) m= vec2(0.,-0.85);
 
-    vec4 col;
-    
     vec3 ro = vec3(0, 17, -1.82);
-    ro.yz *= shipRot(-m.y*3.14+1.);
-    ro.xz *= -shipRot(-m.x*6.2831);    
+    ro.yz *= rot(-m.y*3.14+1.);
+    ro.xz *= -rot(-m.x*6.2831);    
     if ((iTime>=part2start)&&(iTime<part3start))
     {
         ro = vec3(0, 1, -1)*2.;
-        ro.yz *= shipRot(-m.y*3.14+1.);
-        ro.xz *= shipRot(-m.x*6.2831);
+        ro.yz *= rot(-m.y*3.14+1.);
+        ro.xz *= rot(-m.x*6.2831);
     }
     else if (iTime>=part3start) 
     {
@@ -335,44 +307,27 @@ void main()
     ro.y+=0.2+(sin(iTime))*0.04;
     ro.z+=0.05*sin(iTime);
     
-    int ship=0;
     for(int y=0; y<2; y++) {
         vec2 offs = vec2(0, y)/float(2) -.5;
 
-        vec2 uv = (gl_FragCoord.xy+offs-.5*iResolution.xy)/iResolution.y;
+        vec2 uv = (glf.xy+offs-.5*iResolution.xy)/iResolution.y;
         vec3 rd = R(uv, ro, vec3(0,0,0), 1.);
 
         if (iTime<part2start) rd.z+=(32.0-iTime)*0.2; // 1st part
 
-        int mat = 0;
-        float dist = RayMarch(ro, rd, mat).x;
-
+        float dist = RayMarch(ro, rd).x;
         vec3 p = ro + rd * dist;
 
-        if(dist<MAX_DIST) {
-            vec3 n = GetNormal(p);
-            n=normalize(n);
-            p=normalize(p);
+        if(dist<256) 
+        {
+            vec3 n = nm(GetNormal(p));
             vec3 ref = reflect(rd,n);
-            float dif = clamp(0.5*n.y,.0,1.);
-            float diff = length(sin(ref * 6.) * .5 + .5);
-            float spec = pow(diff * .4, 5.) * 5.;
-            vec4 alb = vec4(.7);
-            col = (alb * diff * .6 + spec) * 1.0;
-            col = pow(col, vec4(.8))*dif*2.0;
-            vec4 ls=doLandscape(pl,q,(-n*0.1)-(ref*6.1));
-            col*=ls*1.22;
-            o = col;
-            ship=1;
+            float diff = lt(sin(ref * 6.) * .5 + .5);
+            o=(pow((vec4(.7) * diff * .6 + pow(diff * .4, 5.) * 5.), vec4(.8))*clamp(0.5*n.y,.0,1.))*doLandscape(pl,q,(-n*0.1)-(ref*6.1))*2.44;
         }
     }
-    
-    if (ship==0) 
-    {
-        o=lscapeCol;
-    }
 
-    vec4 flareCol;
-    doFlare(flareCol,gl_FragCoord.xy);
-    o=(o*0.55+flareCol*0.63);
+    vec4 col;
+    doFlare(col,glf.xy);
+    o=(o*0.55+col*0.63);
 }

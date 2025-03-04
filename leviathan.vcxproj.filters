@@ -19,28 +19,16 @@
     <ClInclude Include="src\editor.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\shaders\post.inl">
-      <Filter>shaders</Filter>
-    </None>
     <None Include="src\shaders\fragment.inl">
       <Filter>shaders</Filter>
     </None>
     <None Include="src\shaders\fragment.frag">
       <Filter>shaders</Filter>
     </None>
-    <None Include="src\shaders\post.frag">
-      <Filter>shaders</Filter>
-    </None>
     <None Include="src\shaders\part2.frag">
       <Filter>shaders</Filter>
     </None>
     <None Include="src\shaders\fragment2.inl">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="src\shaders\part3.frag">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="src\shaders\fragment3.inl">
       <Filter>shaders</Filter>
     </None>
   </ItemGroup>
