@@ -6,6 +6,9 @@ out vec4 o;
 #define PI 3.14
 #define fr fract
 
+float iTime = gl_TexCoord[0].x/1000;
+vec2 iResolution=vec2(gl_TexCoord[0].y,gl_TexCoord[0].z);
+
 float noise(vec3 x) 
 {
     vec3 p = floor(x);
@@ -134,13 +137,9 @@ vec3 StarLayer(vec2 uv,float iTime)
     return col;
 }
 
-void main() 
+vec3 doStarBackground(float t)
 {
-    float iTime = gl_TexCoord[0].x/1000;
-    vec2 iResolution=vec2(gl_TexCoord[0].y,gl_TexCoord[0].z);
-
     vec2 uv = (glf.xy-.5*iResolution.xy)/iResolution.y;
-    float t = iTime*.0015; 
     vec3 col = fractalNebula(uv + vec2(.1, .1), vec3(0.3,0.3,0.2), 1.);
     col += fractalNebula(uv + vec2(0., .2), vec3(0.2,0.5,0.4), .5);
     col*=vec3(.74*sin(iTime/16.),.12,.861*cos(iTime/32.));
@@ -150,18 +149,18 @@ void main()
         float depth = fr(i+t);
         col += StarLayer(uv*mix(20., .5, depth)+i*453.2-iTime*.05,iTime)*depth*ss(1.,.9,depth);
     }   
-        
-    // planet-x
-    
+
+    return col;
+}
+
+vec3 doPlanetX(float t,vec3 col)
+{
     vec3 src = vec3(2. * (glf.xy - 0.5*iResolution.xy) / iResolution.yy, 2.0);
     src.y+=3.1-(iTime/32.0);
     vec3 dir = vec3(0,0,-1);
     
     float ang = iTime*0.032;
     mat3 rot = mat3(-sin(ang),0.0,cos(ang),0.,1.,0.,cos(ang),0.,sin(ang));
-    
-    float atmos = 0.0;
-    vec3 loc = src;
 
     if (iTime>78) 
     {
@@ -169,6 +168,8 @@ void main()
         dir = vec3(0., 0., -1.21);
     }
 
+    float atmos=0;
+    vec3 loc;
     float value;
     for (int i=0; i < 256; i++) 
     {
@@ -181,14 +182,11 @@ void main()
     }
 
     // ambient glow
-    if (value > .00001) o = vec4(col,1.0);
+    if (value > .00001) o = vec4(col,1);
     else 
     {
-      vec3 normal = getNormal(loc, value, rot);
-      float light = dot(normal, nm(vec3(0.,3.,1.)));
-
+      float light = dot(getNormal(loc, value, rot), nm(vec3(0.,3.,1.)));
       float totalLight = mix(clamp(field(rot*(loc - 0.5 * dir))/0.5*1.2, 0., 1.), 1.0*max(0.,light), 0.7)*0.1;
-    
       o = vec4(1.0*mix(vec3(0.61,.73,0.5), vec3(0.15,.16,0.72), 1.-(1.2-length(loc))*2.)*totalLight, 1.0);
     }
 
@@ -196,6 +194,16 @@ void main()
 	float q = max(0.51, min(1.0, dot(vec3(p, sqrt(1. - dot(p,p))), vec3(0., 0., 0.))));
     o += q * vec4(max(0.0, pow(dot(nm(src), nm(vec3(0.,2., 1))),1.0)) * pow(atmos,1.5) * vec3(0.5, 0.5, 0.9), 1.0);
 
+    return col;
+}
+
+void main() 
+{
+    float t = iTime*.0015; 
+    vec3 col=doStarBackground(t);
+    col=doPlanetX(t,col);
+
+    // fades
     if (iTime<3.)
     {
         o*=(iTime/3);

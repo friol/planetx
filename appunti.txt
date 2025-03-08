@@ -50,6 +50,9 @@ Switched to the latest version of shader minifier.
 6112. Removed shader 3: 6060 (nice number).
 6099 (!). 6073. 6034. 5999 (lol). 5988.
 
+07/03/2025
+What a week.
+
 
 
 smaller lens flare

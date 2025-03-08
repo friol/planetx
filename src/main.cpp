@@ -9,6 +9,12 @@
 
 #define WINDOWS_IGNORE_PACKING_MISMATCH
 
+#pragma warning( disable : 6031 6387)
+#define WIN32_LEAN_AND_MEAN
+#define WIN32_EXTRA_LEAN
+#define VC_LEANMEAN
+#define VC_EXTRALEAN
+
 // custom build and feature flags
 #ifdef DEBUG
 	#define OPENGL_DEBUG        1
@@ -46,6 +52,7 @@ void drawText(float posx, float posy, char* txt)
 	//((PFNGLUNIFORM1IPROC)wglGetProcAddress("glUniform1i"))(0, 0);
 	((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(0);
 	glColor3f(1.0, 1.0, 1.0);
+	
 	glRasterPos2f(posx,posy);
 	glCallLists(strlen(txt), GL_UNSIGNED_BYTE, txt);
 }
@@ -116,6 +123,7 @@ int __cdecl main(int argc, char* argv[])
 
 	// init font
 	const HFONT mainFont = CreateFont(45, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ANTIALIASED_QUALITY, 0, "Tahoma");
+	//const HFONT mainFont = CreateFont(45, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_DONTCARE | DEFAULT_PITCH, "Verdana");
 	SelectObject(hDC, mainFont);
 	wglUseFontBitmaps(hDC, 0, 256, 0);
 
@@ -251,8 +259,8 @@ int __cdecl main(int argc, char* argv[])
 #define NUM_TEXTS 20
 			textTimeline tlarr[NUM_TEXTS] =
 			{
-				{0.65f,-0.75f,6000,9000,"F   R   I   O   L"},
-				{-0.95f,0.75f,12000,15000,"@REVISION 2o25"},
+				{0.85f,-0.75f,6000,9000,"FRIOL"},
+				{-0.95f,0.75f,12000,15000,"REVISION2o25"},
 				{-0.18f,0.02f,18000,30000,"P  L  A  N  E  T     X"},
 				{0.5f,0.8f,55000,76000,"FLY WITH US:"},
 				{0.5f,0.7f,56000,76000,"SPINNING KIDS"},
