@@ -53,6 +53,17 @@ Switched to the latest version of shader minifier.
 07/03/2025
 What a week.
 
+08/03/2025
+Unified shaders, with bugs, 5924.
+5944, no bugs. 5928, optimized msk.
+5871, #defines for recurring names in shader don't work well.
+5682, unifying noise functions. 5670.
+5556 with the new flare.
+5525 optimizing glHex.
+
+09/03/2025
+5497 optimizing part scheduling.
+5464 optimizing scheduler even more.
 
 
 smaller lens flare

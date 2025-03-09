@@ -25,12 +25,6 @@
     <None Include="src\shaders\fragment.frag">
       <Filter>shaders</Filter>
     </None>
-    <None Include="src\shaders\part2.frag">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="src\shaders\fragment2.inl">
-      <Filter>shaders</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="ext">

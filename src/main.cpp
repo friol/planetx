@@ -4,7 +4,7 @@
 // friol 2o25
 // * for size optimization: study NO_UNIFORM
 // * part 2
-// - experiment with more typefaces
+// * experiment with more typefaces
 //
 
 #define WINDOWS_IGNORE_PACKING_MISMATCH
@@ -39,19 +39,19 @@
 
 #include "glext.h"
 #include "shaders/fragment.inl"
-#include "shaders/fragment2.inl"
+//#include "shaders/fragment2.inl"
 
 #pragma data_seg(".pids")
 // static allocation saves a few bytes
 static int pidMain;
-static int pidPart2;
+//static int pidPart2;
 
 void drawText(float posx, float posy, char* txt)
 {
 	//((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidPost);
 	//((PFNGLUNIFORM1IPROC)wglGetProcAddress("glUniform1i"))(0, 0);
 	((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(0);
-	glColor3f(1.0, 1.0, 1.0);
+	//glColor3f(1.0, 1.0, 1.0);
 	
 	glRasterPos2f(posx,posy);
 	glCallLists(strlen(txt), GL_UNSIGNED_BYTE, txt);
@@ -59,14 +59,14 @@ void drawText(float posx, float posy, char* txt)
 
 void glHex(float x, float y,float k)
 {
-	float ln = k;
+	float ln = k; float lnp04 = ln * 0.4; float lnp14 = ln * 1.4;
 	glBegin(GL_POLYGON);
 	glVertex2f(x+ln,y);
-	glVertex2f(x+(ln*0.4),y+(ln*1.4));
-	glVertex2f(x-(ln*0.4),y+(ln*1.4));
+	glVertex2f(x+ lnp04,y+ lnp14);
+	glVertex2f(x- lnp04,y+ lnp14);
 	glVertex2f(x-ln,y);
-	glVertex2f(x-(ln*0.4),y-(ln*1.4));
-	glVertex2f(x+(ln*0.4),y-(ln*1.4));
+	glVertex2f(x- lnp04,y- lnp14);
+	glVertex2f(x+ lnp04,y- lnp14);
 	glEnd();
 }
 
@@ -107,7 +107,7 @@ int __cdecl main(int argc, char* argv[])
 #ifdef EDITOR_CONTROLS
 	int result = 0;
 	const int debugid = ((PFNGLCREATESHADERPROC)wglGetProcAddress("glCreateShader"))(GL_FRAGMENT_SHADER);
-	((PFNGLSHADERSOURCEPROC)wglGetProcAddress("glShaderSource"))(debugid, 1, &part2_frag, 0);
+	((PFNGLSHADERSOURCEPROC)wglGetProcAddress("glShaderSource"))(debugid, 1, &fragment_frag, 0);
 	((PFNGLCOMPILESHADERPROC)wglGetProcAddress("glCompileShader"))(debugid);
 	((PFNGLGETSHADERIVPROC)wglGetProcAddress("glGetShaderiv"))(debugid, GL_COMPILE_STATUS, &result);
 	if (result == GL_FALSE)
@@ -119,10 +119,10 @@ int __cdecl main(int argc, char* argv[])
 #endif 
 
 	pidMain = ((PFNGLCREATESHADERPROGRAMVPROC)wglGetProcAddress("glCreateShaderProgramv"))(GL_FRAGMENT_SHADER, 1, &fragment_frag);
-	pidPart2= ((PFNGLCREATESHADERPROGRAMVPROC)wglGetProcAddress("glCreateShaderProgramv"))(GL_FRAGMENT_SHADER, 1, &part2_frag);
+	//pidPart2= ((PFNGLCREATESHADERPROGRAMVPROC)wglGetProcAddress("glCreateShaderProgramv"))(GL_FRAGMENT_SHADER, 1, &part2_frag);
 
 	// init font
-	const HFONT mainFont = CreateFont(45, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ANTIALIASED_QUALITY, 0, "Tahoma");
+	const HFONT mainFont = CreateFont(45, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ANTIALIASED_QUALITY, 0, "Arial");
 	//const HFONT mainFont = CreateFont(45, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_DONTCARE | DEFAULT_PITCH, "Verdana");
 	SelectObject(hDC, mainFont);
 	wglUseFontBitmaps(hDC, 0, 256, 0);
@@ -159,7 +159,7 @@ int __cdecl main(int argc, char* argv[])
 			PeekMessage(0, 0, 0, 0, PM_REMOVE);
 #endif
 
-			int p0 = timeGetTime() - startTime;//+27000;
+			int p0 = timeGetTime() - startTime;
 
 #if USE_AUDIO
 			waveOutGetPosition(hWaveOut, &MMTime, sizeof(MMTIME));
@@ -175,25 +175,23 @@ int __cdecl main(int argc, char* argv[])
 #define FADEP3END 56000
 #define REALFADEP3END 53000
 #define PART4START 78000
-#define NUMROWS 24
 #define HEXROWS 16
 #define HEXCOLS 10
 #define HEXSTART 10000
 #define HEXEND 10000
 
-			if (p0 < FADESTART)
+			glLoadIdentity();
+			((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidMain);
+			glTexCoord3i(p0, p1, p2);
+			if ((p0 >= REALFADEP3END) && (p0 < PART4START))
 			{
-				((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidMain);
-				glTexCoord3i(p0, p1, p2);
-				glRects(-1, -1, 1, 1);
+				glTexCoord3i(-p0, p1, p2);
 			}
-			else if ((p0 >= FADESTART) && (p0 < FADEEND))
+			glRects(-1, -1, 1, 1);
+
+			if ((p0 >= FADESTART) && (p0 < FADEEND))
 			{
-				((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidMain);
-				glTexCoord3i(p0, p1, p2);
-				glRects(-1, -1, 1, 1);
-				((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidPart2);
-				glTexCoord3i(p0, p1, p2);
+				glTexCoord3i(p0+200000, p1, p2);
 				float k = ((((float)p0 - FADESTART) / (FADESTART-FADEEND))*4.0f);
 				glBegin(GL_TRIANGLES);
 				glVertex2f(0.0f,k);
@@ -201,22 +199,10 @@ int __cdecl main(int argc, char* argv[])
 				glVertex2f(-k*0.85f, -k*1.3f);
 				glEnd();
 			}
-			else if (p0<FADEP3START)
-			{
-				((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidPart2);
-				glTexCoord3i(p0, p1, p2);
-				glRects(-1, -1, 1, 1);
-			}
 			else if ((p0 >= FADEP3START) && (p0 < REALFADEP3END))
 			{
-				glLoadIdentity();
-				((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidPart2);
-				glTexCoord3i(p0, p1, p2);
-				glRects(-1, -1, 1, 1);
+				float k = (((((float)p0 - FADEP3START) / (FADEP3END - FADEP3START))))/8;
 
-				float k = ((((float)p0 - FADEP3START) / (FADEP3END - FADEP3START)));
-
-				//((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidPart2);
 				glTexCoord3i(-p0, p1, p2);
 
 				glScalef(3,3,3);
@@ -228,24 +214,11 @@ int __cdecl main(int argc, char* argv[])
 					if ((r % 2) == 1) xpos -= 0.072f;
 					for (int x = 0;x < HEXCOLS;x++)
 					{
-						glHex(xpos, ypos, k / 8.0f);
+						glHex(xpos, ypos, k);
 						xpos += 0.145f;
 					}
 					ypos -= 0.07f;
 				}
-			}
-			else if ((p0>=REALFADEP3END)&&(p0<PART4START))
-			{
-				glLoadIdentity();
-				((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidPart2);
-				glTexCoord3i(-p0, p1, p2);
-				glRects(-1, -1, 1, 1);
-			}
-			else
-			{
-				((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidMain);
-				glTexCoord3i(p0, p1, p2);
-				glRects(-1, -1, 1, 1);
 			}
 
 			typedef struct
@@ -262,7 +235,7 @@ int __cdecl main(int argc, char* argv[])
 				{0.85f,-0.75f,6000,9000,"FRIOL"},
 				{-0.95f,0.75f,12000,15000,"REVISION2o25"},
 				{-0.18f,0.02f,18000,30000,"P  L  A  N  E  T     X"},
-				{0.5f,0.8f,55000,76000,"FLY WITH US:"},
+				{0.5f,0.8f,55000,76000,"KEEP FLYING:"},
 				{0.5f,0.7f,56000,76000,"SPINNING KIDS"},
 				{0.5f,0.6f,57000,76000,"DEATHSTAR"},
 				{0.5f,0.5f,58000,76000,"DARKAGE"},
