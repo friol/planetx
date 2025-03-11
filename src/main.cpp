@@ -179,7 +179,7 @@ int __cdecl main(int argc, char* argv[])
 #define HEXSTART 10000
 #define HEXEND 10000
 
-			p0 += 23000;
+			p0 += 27000;
 
 			glLoadIdentity();
 			((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidMain);
@@ -236,24 +236,24 @@ int __cdecl main(int argc, char* argv[])
 			{
 				{0.8f,-0.75f,6000,9000,"FRIOL"},
 				{-0.95f,0.75f,12000,15000,"REVISION2o25"},
-				{-0.18f,0.02f,18000,30000,"P  L  A  N  E  T     X"},
-				{0.5f,0.8f,55000,76000,"KEEP FLYING:"},
-				{0.5f,0.7f,56000,76000,"SPINNING KIDS"},
-				{0.5f,0.6f,57000,76000,"DEATHSTAR"},
-				{0.5f,0.5f,58000,76000,"DARKAGE"},
-				{0.5f,0.4f,59000,76000,"MERCURY"},
-				{0.5f,0.3f,60000,76000,"CONSPIRACY"},
-				{0.5f,0.2f,61000,76000,"FUTURE CREW"},
-				{0.5f,0.1f,62000,76000,"ASD"},
-				{0.5f,0.0f,63000,76000,"RGBA"},
-				{0.5f,-0.1f,64000,76000,"TBL"},
-				{0.5f,-0.2f,65000,76000,"JAPOTEK"},
-				{0.5f,-0.3f,66000,76000,"RITUAL"},
-				{0.5f,-0.4f,67000,76000,"ZERO DEFECTS"},
-				{0.5f,-0.5f,68000,76000,"PAN"},
-				{0.5f,-0.6f,69000,76000,"PELLICU$"},
-				{0.5f,-0.7f,70000,76000,"FIZZER"},
-				{0.5f,-0.8f,71000,76000,"AND YOU"},
+				{-0.18f,0.02f,18000,30000,"P  L  A  N  E  T  X"},
+				{0.5f,0.8f,54000,77000,"KEEP FLYING:"},
+				{0.5f,0.7f,55000,77000,"SPINNING KIDS"},
+				{0.5f,0.6f,56000,77000,"DEATHSTAR"},
+				{0.5f,0.5f,57000,77000,"DARKAGE"},
+				{0.5f,0.4f,58000,77000,"MERCURY"},
+				{0.5f,0.3f,59000,77000,"CONSPIRACY"},
+				{0.5f,0.2f,60000,77000,"FUTURE CREW"},
+				{0.5f,0.1f,61000,77000,"ASD"},
+				{0.5f,0.0f,62000,77000,"RGBA"},
+				{0.5f,-0.1f,63000,77000,"TBL"},
+				{0.5f,-0.2f,64000,77000,"JAPOTEK"},
+				{0.5f,-0.3f,65000,77000,"RITUAL"},
+				{0.5f,-0.4f,66000,77000,"ZERO DEFECTS"},
+				{0.5f,-0.5f,67000,77000,"PAN"},
+				{0.5f,-0.6f,68000,77000,"PELLICU$"},
+				{0.5f,-0.7f,69000,77000,"FIZZER"},
+				{0.5f,-0.8f,70000,77000,"AND YOU"},
 			};
 
 			for (unsigned int i = 0;i < NUM_TEXTS;i++)

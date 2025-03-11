@@ -24,7 +24,7 @@ Playing with a new transition, with poor results.
 Compresses down to 5654 bytes.
 
 27/02/2025
-Why not a good flare in the spaceship scene?
+Why not a good flare in the spaceship scene? Maybe because we don't have space.
 https://www.shadertoy.com/view/Xlc3D2
 Integrated the flare, p2 scene looks better with that light haze.
 
@@ -68,6 +68,16 @@ Unified shaders, with bugs, 5924.
 
 10/03/2025
 Hard times. On it.
+
+11/03/2025
+4668, removing the spaceship and with (crappy) planet y.
+4653 ternary ops. 
+4599 planet z. 4508 and the fractal nebula is gone.
+
+12/03/2025
+4517.
+
+
 
 
 nice glow

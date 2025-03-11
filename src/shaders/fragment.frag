@@ -1,6 +1,6 @@
 #version 130
 out vec4 o;
-float iTime = gl_TexCoord[0].x/1000;
+float ie=gl_TexCoord[0].x/1000;
 vec2 ir=vec2(gl_TexCoord[0].y,gl_TexCoord[0].z);
 vec2 xy=gl_FragCoord.xy-.5*ir;
 
@@ -35,7 +35,7 @@ vec3 bskyFun()
     for (i=0;i <70;i++)
     {        
         vec2 fp = p*i*.1/(2*p.y+1.8);
-        fp.x -= iTime*.5;
+        fp.x -= ie*.5;
         mat2 m = mat2( 1.6,  1.2, -1.2,  1.6 );
         f  = .5*bskynoise(fp); fp = m*fp*1.1;
 		f += .25*bskynoise(fp); fp*=m;
@@ -55,7 +55,7 @@ vec3 bskyFun()
 // part 1 stuff
 //
 
-vec3 fractalNebula(vec2 coord, vec3 color, float transparency)
+/*vec3 fractalNebula(vec2 coord, vec3 color, float transparency)
 {
     float n = 0.;
     float frequency = 1.;
@@ -67,15 +67,9 @@ vec3 fractalNebula(vec2 coord, vec3 color, float transparency)
         frequency*=2;
     }
     return n*color*transparency;
-}
+}*/
 
-float Star(vec2 uv, float flare)
-{
-    float d = length(uv);
-  	float m = sin(.015*1.2)/d;  
-    m += (max(0.01,.5-abs(uv.x*uv.y*1000.))*flare)*.1;
-    return m*smoothstep(1., .1, d);
-}
+float Star(vec2 uv, float flare){ return ((.015/length(uv))+(max(0.01,.5-abs(uv.x*uv.y*1000.))*flare)*.1)*smoothstep(1,.1,length(uv)); }
 
 float Hash21(vec2 p)
 {
@@ -84,36 +78,33 @@ float Hash21(vec2 p)
     return fract(p.x*p.y);
 }
 
-vec3 StarLayer(vec2 uv,float iTime)
+vec3 StarLayer(vec2 uv,float gg)
 {
     vec3 col = vec3(0);
-    vec2 id = floor(uv);
     for(int y=-1;y<=1;y++){
         for(int x=-1; x<=1; x++){
             vec2 offs = vec2(x,y);
-            float n = Hash21(id+offs);
+            float n = Hash21(floor(uv)+offs);
             float size = fract(n);
             float star = Star(fract(uv)-offs-vec2(n, fract(n*34.))+.5, smoothstep(.1,.9,size)*.46);
-            vec3 color = sin(vec3(.12,.513,.79)*fract(n*2.2)*6.28)*.25+.75;
-            color = color*vec3(.69,.59,.49+size);
-            star *= sin(iTime*.6+n*6.28)*.5+.5;
-            col += star*size*color;
+            star *= sin(gg*.6+n*6.28)*.5+.5;
+            col+=star*size*(sin(vec3(.12,.51,.79)*fract(n*2.2)*6.28)*.25+.75)*vec3(.69,.59,.49+size);
         }
     }
     return col;
 }
 
-vec3 doStarBackground(float t)
+vec3 doStarBackground()
 {
-    vec2 uv = xy/ir.y;
-    vec3 col = fractalNebula(uv + vec2(.1, .1), vec3(0.3,0.3,0.2), 1.);
-    col += fractalNebula(uv + vec2(0., .2), vec3(0.2,0.5,0.4), .5);
-    col*=vec3(.74*sin(iTime/16.),.12,.861*cos(iTime/32.));
+    //vec3 col = fractalNebula(uv + vec2(.1, .1), vec3(0.3,0.3,0.2), 1.);
+    //col += fractalNebula(uv + vec2(0., .2), vec3(0.2,0.5,0.4), .5);
+    //col*=vec3(.74*sin(ie/16.),.12,.861*cos(ie/32.));
+    vec3 col;//=vec3(0);
 
-    for(float i=0.; i<1.; i+=.2)
+    for(float i=0;i<1;i+=.2)
     {
-        float depth = fract(i+t);
-        col += StarLayer(uv*mix(20., .5, depth)+i*453.2-iTime*.05,iTime)*depth*smoothstep(1.,.9,depth);
+        float depth = fract(i+ie*.0015);
+        col += StarLayer((xy/ir.y)*mix(20., .5, depth)+i*453.2-ie*.05,ie)*depth*smoothstep(1.,.9,depth);
     }   
 
     return col;
@@ -152,13 +143,13 @@ vec3 getNormal(vec3 p, float value, mat3 rot)
 vec3 doPlanetX(float t,vec3 col)
 {
     vec3 src = vec3(2*xy/ir.yy,2);
-    src.y+=3.1-(iTime/32.0);
+    src.y+=3.1-(ie/32.0);
     vec3 dir = vec3(0,0,-1);
     
-    float ang = iTime*0.032;
+    float ang = ie*0.032;
     mat3 rot = mat3(-sin(ang),0.0,cos(ang),0.,1.,0.,cos(ang),0.,sin(ang));
 
-    if (iTime>78) 
+    if (ie>78) 
     {
         src = vec3(8. * xy/ ir.yy, 3.0);
         dir = vec3(0., 0., -1.21);
@@ -173,7 +164,7 @@ vec3 doPlanetX(float t,vec3 col)
         if (loc.z < -1.) break;
         value = field(rot*loc*0.54);
         if (value <= .00001) break;
-        else atmos += 0.02+0.01*abs(sin(iTime/16.0));
+        else atmos += 0.02+0.01*abs(sin(ie/16.0));
         t += value*.5;
     }
 
@@ -194,33 +185,46 @@ vec3 doPlanetX(float t,vec3 col)
 }
 */
 //
-
-#define caz(z) exp(- 1./vec4(1,.6,.4,1) * .31/(z) )        // spectral transmittance for optical depth z
+/*
+#define g(z) exp(- 1./vec4(1,.6,.4,1) * .31/(z) )        // spectral transmittance for optical depth z
 void doPlanetY()
 {
     vec2 R = ir.xy,
          U = xy/R.y,
          M = R/R.x;
-    if (iTime<78) U.y+=1.55-iTime/128.0;
+    if (ie<78) U.y+=1.55-ie/128.0;
     else U*=3;
 
     float H = .3,                                          // atmosphere thickness ralative to radius
           r = dot(U,U),
           d = dot(M,M),
-          //t = -1.15*iTime,
+          //t = -1.15*ie,
           l = dot( vec3(U, sqrt(1.-r)),                    // hit point in Sun frame
                      //vec3(M,sqrt(abs(.2-d))*sign(1.-d))  // Sun direction
                      vec3(.01,.52,-.7)
                  );
    
-    o = r < 1?( 1.- caz( sqrt(1.-r) )  )                  // atmosphere opacity along ray
+    o = r < 1?( 1.- g( sqrt(1.-r) )  )                  // atmosphere opacity along ray
       * smoothstep(-sqrt(2.*H),0.,l) * smoothstep(1.,1.-16./R.y,r) // up to terminator + AA
                 + mix( l * vec4(.01,.5,1,0) ,               // ocean color
-                       .5*caz(max(0.,l)),                   // Sun color seen by clouds and reflected to space
+                       .5*g(max(0.,l)),                   // Sun color seen by clouds and reflected to space
                        smoothstep(1.61,0.,abs(U.y))    // cloud layer
                      )
                //: r<1.2?o+abs(.2-length(.3+r-d))*vec4(0.2,0.4,1.0,1.0):o;  
                : o;
+}
+*/
+
+void doPlanetZ(vec2 I)
+{
+    vec2 U=ie<32?vec2(1):xy/ir.y;
+    vec4 oo=o;
+    I.y+=ie<32?15e2-ie*9:0;
+    I -= o.xy = ir.xy*.5; // Center
+    o = .8-sqrt(max(o-o,1.-dot(I/=ie<32?o.y*2:o.y*.5,I))); // Depth
+	o = (1.-o)/3.2*min(o+I.x+I.y*.8, -.1) + // Lighting
+        vec4(.5,.2,.7+I.x, 0) / dot(I*.5,I*1.3)*o; // Radiant light
+    if (length(U)>.25) o=(.5*oo)+(.5*o);
 }
 
 /*
@@ -238,7 +242,7 @@ const float atmAmbientValue           =   0.15;
 void doPlanetY(vec3 col)
 {
     vec2 uv = gl_FragCoord.xy / ir;
-    uv.y+=1.0-iTime/64;
+    uv.y+=1.0-ie/64;
     uv -= 0.5; // Center it
     float aspect = ir.x / ir.y;
     uv.x *= aspect; // Make it round
@@ -274,7 +278,7 @@ void doPlanetY(vec3 col)
     vec2 c=gl_FragCoord.xy;
     vec2 r = ir.xy,
          u = (c+c - r) / r.y;
-    vec3 l = cos(iTime) * vec3(1, .4, tan(iTime)),
+    vec3 l = cos(ie) * vec3(1, .4, tan(ie)),
          n = vec3(u, sqrt(1. - dot(u, u))),
          d = max(dot(n, l), 0.) * vec3(0, 2, 4);
 
@@ -289,7 +293,7 @@ void doPlanetY(vec3 col)
 //
 
 // ship
-
+/*
 float opSmoothUnion( float d1, float d2, float k )
 {
     float h = max(k-abs(d1-d2),0.0);
@@ -297,7 +301,6 @@ float opSmoothUnion( float d1, float d2, float k )
 }
 
 float ndot(vec2 a, vec2 b ) { return a.x*b.x - a.y*b.y; }
-//#define ndot(a,b) float(a.x*b.x - a.y*b.y)
 
 float sdRhombus(vec3 p)
 {
@@ -371,12 +374,13 @@ vec3 R(vec2 uv, vec3 p, vec3 l, float z) {
         d = normalize(i-p);
     return d;
 }
+*/
 
 // lscape
 
 #define rot(a) mat2(cos(a),-sin(a),sin(a),cos(a))
 
-vec2 lscapefield(in vec3 p) 
+vec2 lscapefield(vec3 p) 
 {
     vec3 l = vec3(1.);
 	float s=2.,e,f,o;
@@ -390,17 +394,20 @@ vec2 lscapefield(in vec3 p)
 
 vec4 landScape( in vec3 ro, vec3 rd )
 {
-    float t = 2.5;
-    float dt = .031;
+    float t=2;
+    float dt=.03;
     vec3 col;
-    for( int i=0; i<80; i++ )
-	{                
+    int i;
+    do
+    {                
         vec2 v = lscapefield(ro+t*rd);  
         float c=v.x, f=v.y;
         t+=dt*f;
         dt *= 1.03;
-        col = .95*col+ .09*vec3(c*c*c,c*c,c);	
+        col=.95*col+.09*vec3(c*c*c,c*c,c);	
+        i++;
     }
+    while (i<80);
     return vec4(col,t);
 }
 
@@ -411,20 +418,15 @@ vec4 doLandscape(vec2 p,vec2 q,vec3 rols)
     vec3 uu = normalize( cross(ww,vec3(0,1,0) ) );
     vec3 vv = normalize( cross(uu,ww));
     vec3 rd = normalize( p.x*uu + p.y*vv + 2.0*ww );
-    rols.z -=iTime*.4;
-
+    rols.z-=ie*.4;
     vec4 lss=landScape(rols,rd);
-    vec3 lscapeCol = landScape(rols,rd).xyz;
-	
-    lscapeCol=.75*(log(.25+lscapeCol));
-    return vec4(lscapeCol,lss.w);
+    return vec4(.75*(log(.25+lss.xyz)),lss.w);
 }
 
 // new flare
 
 float sdHex(vec2 p)
 {
-    p = abs(p);
 	vec2 q = vec2(p.x*2.0*0.57,p.y+p.x*0.57);
 	return dot(step(q.xy,q.yx), 1.0-q.yx);
 }
@@ -434,29 +436,28 @@ float sdHex(vec2 p)
 vec3 renderhex(vec2 uv, vec2 p, float s, vec3 col){
     uv -= p;
     if (abs(uv.x) < 0.2*s && abs(uv.y) < 0.2*s){
-        return mix(vec3(0),mix(vec3(0),col,0.1 + fpow(length(uv/s),0.1)*10.0),smoothstep(0.0,0.3,sdHex(uv*5.0/s)));
+        return mix(vec3(0),mix(vec3(0),col,0.1 + fpow(length(uv/s),0.1)*10.0),smoothstep(0.0,0.3,sdHex(abs(uv*5.0/s))));
     }
     return vec3(0);
 }
 
 vec3 renderLensFlare(vec2 uv, vec2 light)
 {
-    vec3 col;
-    //ghosts
-    col = renderhex(uv, -light*0.25, 1.4, vec3(0.25,0.75,0));
+    vec3 col=renderhex(uv, -light*0.25, 1.4, vec3(0.25,0.75,0));
     col += renderhex(uv, light*0.25, 0.5, vec3(1,0.5,0.5));
     col += renderhex(uv, light*0.1, 1.6, vec3(1,1,1));
-    col += renderhex(uv, light*1.8, 2.0, vec3(0,0.5,0.75));
-    col += renderhex(uv, light*1.25, 0.8, vec3(1,1,0.5));
-    col += renderhex(uv, -light*1.25, 5.0, vec3(0.5,0.5,0.25));
+    //col += renderhex(uv, light*1.8, 2.0, vec3(0,0.5,0.75)); // top left
+    //col += renderhex(uv, light*1.25, 0.8, vec3(1,1,0.5));
+    //col += renderhex(uv, -light*1.25, 5.0, vec3(0.5,0.5,0.25)); // big one right bottom
     //circular ghost
-    col += fpow(1.0 - abs(distance(light*0.8,uv) - 0.7),0.985)*vec3(0.1,0.05,0);
+    col += fpow(1-abs(distance(light*.8,uv)-.7),.9)*vec3(.1,0.05,0);
     //flare
     //col += vec3(1.0,0.6,0.4)*fpow(textureLod(iChannel0,normalize(light-uv)*0.25,0.0).r,0.3)*0.04/distance(light,uv);
     //bloom
-    col += vec3(1.0,0.6,0.4)*fpow(max(1.0 - distance(uv,light),0.0),0.5);
-    return col/(1.0 + distance(uv,light));
+    col+=vec3(.7)*fpow(max(1-distance(uv,light),0),.5);
+    return col/(1+distance(uv,light));
 }
+
 
 //
 //
@@ -465,53 +466,56 @@ vec3 renderLensFlare(vec2 uv, vec2 light)
 void main() 
 {
     // bluesky, part3
-    if (iTime<0) { o=vec4(bskyFun(),1); return; }
+    if (ie<0) { o=vec4(bskyFun(),1); return; }
 
     // part 1,stars+planet
-    if ((iTime<32)||((iTime>=78)&&(iTime<200)))
+    if ((ie<32)||((ie>=78)&&(ie<200)))
     {
-        o=vec4(doStarBackground(iTime*.0015),1);
+        o=vec4(doStarBackground(),1);
         //col=doPlanetX(t,col);
-        doPlanetY();
+        //doPlanetY();
+        doPlanetZ(xy+.5*ir);
     }
     // part 2
     else
     {
-        if (iTime>200) { iTime-=200; }
+        ie=ie>200?ie-200:ie;
 
-        vec2 q = gl_FragCoord.xy / ir;
-        vec2 pl=-1.0 + 2.0 * q;
-        if (iTime>=36) pl=-1.62 +2.725 * q;
-        pl.x *= ir.x/ir.y;
+        vec2 q=xy/ir+.5;
+        vec2 pl=ie<36?-1.0 + 2.0 * q:-1.62 +2.725 * q;
+        pl.x*=ir.x/ir.y;
 
-        vec2 m = vec2(0.5,0.68); // p1
-        vec3 rols = vec3(.0,2.,2.);
-        if (iTime>=36) { rols= vec3(2.1,1.1,-2.); m=vec2(-.44,.49); }
-        if (iTime>=42) { rols= vec3(0.0,3.1,0.1); m=vec2(0.,-0.85); }
+        /*vec2 m = vec2(0.5,0.68);*/ // p1
+        //vec3 rols = vec3(.0,2.,2.);
+        //if (ie>=36) { rols= vec3(2.1,1.1,-2.); /*m=vec2(-.44,.49);*/ }
+        //if (ie>=42) { rols= vec3(0.0,3.1,0.1); /*m=vec2(0.,-0.85);*/ }
+
+        vec3 rols=ie<36?vec3(.0,2.,2.):ie>=42?vec3(0.0,3.1,0.1):vec3(2.1,1.1,-2.);
 
         o=doLandscape(pl,q,rols);
 
+        /*
         // ship
     
         vec3 ro = vec3(0, 17, -1.82);
         ro.yz *= rot(1-m.y*3.14);
         ro.xz *= -rot(-m.x*6.2);    
-        if ((iTime>=36)&&(iTime<42))
+        if ((ie>=36)&&(ie<42))
         {
             ro = vec3(0, 1, -1)*2.;
             ro.yz *= rot(-m.y*3.14+1.);
             ro.xz *= rot(-m.x*6.2);
         }
-        else if (iTime>=42) 
+        else if (ie>=42) 
         {
             ro.y+=7.0;
         }
-        //ro.y+=0.2+(sin(iTime))*0.04;
-        //ro.z+=0.05*sin(iTime);
+        //ro.y+=0.2+(sin(ie))*0.04;
+        //ro.z+=0.05*sin(ie);
     
         vec3 rd = R((xy+vec2(0,0)-.5)/ir.y, ro, vec3(0,0,0), 1.);
 
-        if (iTime<36) rd.z+=(32.0-iTime)*0.2; // 1st part, ship floating forwards
+        if (ie<36) rd.z+=(32.0-ie)*0.2; // 1st part, ship floating forwards
 
         float dist = RayMarch(ro, rd).x;
         if(dist<256) 
@@ -521,20 +525,21 @@ void main()
             float diff = length(sin(ref * 6.) * .5 + .5);
             o=(pow((vec4(.7) * diff * .6 + pow(diff * .4, 5.) * 5.), vec4(.8))*clamp(0.5*n.y,.0,1.))*doLandscape(pl,q,(-n*0.1)-(ref*6.1))*2.44;
         }
+        */
 
         //vec4 col;
         //doFlare(col,gl_FragCoord.xy);
         //o=(o*0.55+col*0.63);
-        o=(o*0.95+vec4(renderLensFlare(xy/ir.y*2,vec2(-0.98,0.6)),1));
+        o+=vec4(renderLensFlare(xy/ir.y*2,vec2(-1,.6)),1);
     }
 
     // fades
-    if (iTime<3.)
+    /*if (ie<3.) { o*=(ie/3); }*/
+    if (ie>=88)
     {
-        o*=(iTime/3);
+        o*=((89/4.-ie/4.))>0?((89/4.-ie/4.)):0;
     }
-    else if (iTime>=88)
-    {
-        o*=((89/4.-iTime/4.))>0?((89/4.-iTime/4.)):0;
-    }
+    o=ie<3?o*(ie/3):o;
+
+    //o=ie<3?o*(ie/3):ie>=88?o*((89/4.-ie/4.))>0?((89/4.-ie/4.)):0:o;
 }
