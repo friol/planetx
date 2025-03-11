@@ -44,7 +44,6 @@
 #pragma data_seg(".pids")
 // static allocation saves a few bytes
 static int pidMain;
-//static int pidPart2;
 
 void drawText(float posx, float posy, char* txt)
 {
@@ -180,8 +179,11 @@ int __cdecl main(int argc, char* argv[])
 #define HEXSTART 10000
 #define HEXEND 10000
 
+			p0 += 23000;
+
 			glLoadIdentity();
 			((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidMain);
+			//glTexCoord3i(p0, p1, p2);
 			glTexCoord3i(p0, p1, p2);
 			if ((p0 >= REALFADEP3END) && (p0 < PART4START))
 			{
@@ -211,7 +213,7 @@ int __cdecl main(int argc, char* argv[])
 				for (int r = 0;r < HEXROWS;r++)
 				{
 					float xpos = -0.8f;
-					if ((r % 2) == 1) xpos -= 0.072f;
+					if (r%2) xpos -= 0.072f;
 					for (int x = 0;x < HEXCOLS;x++)
 					{
 						glHex(xpos, ypos, k);
@@ -232,7 +234,7 @@ int __cdecl main(int argc, char* argv[])
 #define NUM_TEXTS 20
 			textTimeline tlarr[NUM_TEXTS] =
 			{
-				{0.85f,-0.75f,6000,9000,"FRIOL"},
+				{0.8f,-0.75f,6000,9000,"FRIOL"},
 				{-0.95f,0.75f,12000,15000,"REVISION2o25"},
 				{-0.18f,0.02f,18000,30000,"P  L  A  N  E  T     X"},
 				{0.5f,0.8f,55000,76000,"KEEP FLYING:"},

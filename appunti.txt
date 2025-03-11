@@ -64,7 +64,23 @@ Unified shaders, with bugs, 5924.
 09/03/2025
 5497 optimizing part scheduling.
 5464 optimizing scheduler even more.
+5436.
 
+10/03/2025
+Hard times. On it.
+
+
+nice glow
+https://www.shadertoy.com/view/ctG3zW
+
+planetz
+https://www.shadertoy.com/view/NssSW8
+
+gas planet golfed
+https://www.shadertoy.com/view/l3GcWD
+
+alternative planet (short)
+https://www.shadertoy.com/view/msfyRM
 
 smaller lens flare
 https://www.shadertoy.com/view/dllSRX
