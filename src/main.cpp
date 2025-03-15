@@ -39,24 +39,19 @@
 
 #include "glext.h"
 #include "shaders/fragment.inl"
-//#include "shaders/fragment2.inl"
 
 #pragma data_seg(".pids")
 // static allocation saves a few bytes
 static int pidMain;
 
-void drawText(float posx, float posy, char* txt)
+/*void drawText(float posx, float posy, char* txt)
 {
-	//((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidPost);
-	//((PFNGLUNIFORM1IPROC)wglGetProcAddress("glUniform1i"))(0, 0);
 	((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(0);
-	//glColor3f(1.0, 1.0, 1.0);
-	
 	glRasterPos2f(posx,posy);
 	glCallLists(strlen(txt), GL_UNSIGNED_BYTE, txt);
-}
+}*/
 
-void glHex(float x, float y,float k)
+/*void glHex(float x, float y, float k)
 {
 	float ln = k; float lnp04 = ln * 0.4; float lnp14 = ln * 1.4;
 	glBegin(GL_POLYGON);
@@ -67,7 +62,7 @@ void glHex(float x, float y,float k)
 	glVertex2f(x- lnp04,y- lnp14);
 	glVertex2f(x+ lnp04,y- lnp14);
 	glEnd();
-}
+}*/
 
 #ifndef EDITOR_CONTROLS
 #pragma code_seg(".main")
@@ -142,6 +137,7 @@ int __cdecl main(int argc, char* argv[])
 		ShowCursor(0);
 
 		unsigned long startTime = timeGetTime();
+		int p0;
 
 		// mainloop
 		do
@@ -158,7 +154,7 @@ int __cdecl main(int argc, char* argv[])
 			PeekMessage(0, 0, 0, 0, PM_REMOVE);
 #endif
 
-			int p0 = timeGetTime() - startTime;
+			p0 = timeGetTime() - startTime;
 
 #if USE_AUDIO
 			waveOutGetPosition(hWaveOut, &MMTime, sizeof(MMTIME));
@@ -176,10 +172,8 @@ int __cdecl main(int argc, char* argv[])
 #define PART4START 78000
 #define HEXROWS 16
 #define HEXCOLS 10
-#define HEXSTART 10000
-#define HEXEND 10000
 
-			p0 += 27000;
+			//p0 += 16000;
 
 			glLoadIdentity();
 			((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidMain);
@@ -216,7 +210,17 @@ int __cdecl main(int argc, char* argv[])
 					if (r%2) xpos -= 0.072f;
 					for (int x = 0;x < HEXCOLS;x++)
 					{
-						glHex(xpos, ypos, k);
+						/*glHex(xpos, ypos, k);*/
+						float ln = k; float lnp04 = ln * 0.4; float lnp14 = ln * 1.4;
+						glBegin(GL_POLYGON);
+						glVertex2f(xpos + ln, ypos);
+						glVertex2f(xpos + lnp04, ypos + lnp14);
+						glVertex2f(xpos - lnp04, ypos + lnp14);
+						glVertex2f(xpos - ln, ypos);
+						glVertex2f(xpos - lnp04, ypos - lnp14);
+						glVertex2f(xpos + lnp04, ypos - lnp14);
+						glEnd();
+
 						xpos += 0.145f;
 					}
 					ypos -= 0.07f;
@@ -227,24 +231,23 @@ int __cdecl main(int argc, char* argv[])
 			{
 				float px, py;
 				unsigned int positionStart;
-				unsigned int positionEnd;
 				char* str;
 			} textTimeline;
 
-#define NUM_TEXTS 20
+#define NUM_TEXTS 4
 			textTimeline tlarr[NUM_TEXTS] =
 			{
-				{0.8f,-0.75f,6000,9000,"FRIOL"},
-				{-0.95f,0.75f,12000,15000,"REVISION2o25"},
-				{-0.18f,0.02f,18000,30000,"P  L  A  N  E  T  X"},
-				{0.5f,0.8f,54000,77000,"KEEP FLYING:"},
-				{0.5f,0.7f,55000,77000,"SPINNING KIDS"},
+				{0.7f,-0.75f,6000,"F R I O L"},
+				{-0.95f,0.75f,12000,"REVISION 2o25"},
+				{-0.18f,0.02f,18000,"P L A N E T  X"},
+				{0.6f,-0.8f,54000,"KEEP FLYING."},
+				/*{0.5f,0.7f,55000,"SK"},
+				{0.5f,0.6f,61000,"ASD"},
 				{0.5f,0.6f,56000,77000,"DEATHSTAR"},
 				{0.5f,0.5f,57000,77000,"DARKAGE"},
 				{0.5f,0.4f,58000,77000,"MERCURY"},
 				{0.5f,0.3f,59000,77000,"CONSPIRACY"},
 				{0.5f,0.2f,60000,77000,"FUTURE CREW"},
-				{0.5f,0.1f,61000,77000,"ASD"},
 				{0.5f,0.0f,62000,77000,"RGBA"},
 				{0.5f,-0.1f,63000,77000,"TBL"},
 				{0.5f,-0.2f,64000,77000,"JAPOTEK"},
@@ -253,14 +256,18 @@ int __cdecl main(int argc, char* argv[])
 				{0.5f,-0.5f,67000,77000,"PAN"},
 				{0.5f,-0.6f,68000,77000,"PELLICU$"},
 				{0.5f,-0.7f,69000,77000,"FIZZER"},
-				{0.5f,-0.8f,70000,77000,"AND YOU"},
+				{0.5f,-0.8f,70000,77000,"AND YOU"},*/
 			};
 
 			for (unsigned int i = 0;i < NUM_TEXTS;i++)
 			{
-				if ((p0 >= tlarr[i].positionStart) && (p0 < tlarr[i].positionEnd))
+				int pend = i == 0 ? 9000 : i == 1 ? 15000 : i == 2 ? 30000 : 77000;
+				if ((p0 >= tlarr[i].positionStart) && (p0 < pend))
 				{
-					drawText(tlarr[i].px,tlarr[i].py,tlarr[i].str);
+					//drawText(tlarr[i].px,tlarr[i].py,tlarr[i].str);
+					((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(0);
+					glRasterPos2f(tlarr[i].px, tlarr[i].py);
+					glCallLists(strlen(tlarr[i].str), GL_UNSIGNED_BYTE, tlarr[i].str);
 				}
 			}
 
@@ -292,7 +299,8 @@ int __cdecl main(int argc, char* argv[])
 	} 
 	while(!GetAsyncKeyState(VK_ESCAPE)
 		#if USE_AUDIO
-			&& MMTime.u.sample < MAX_SAMPLES
+			//&& MMTime.u.sample < MAX_SAMPLES
+			&& p0<90000
 		#endif
 	);
 

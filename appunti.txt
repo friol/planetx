@@ -75,10 +75,36 @@ Hard times. On it.
 4599 planet z. 4508 and the fractal nebula is gone.
 
 12/03/2025
-4517.
+4517. 4506 with aggressive (grr) inlining.
+4479 - for compresses better than do while.
+4474. 4471 subsequent initializations.
+4352 with the new starfield. 4334 more sub inits.
+
+13/03/2025
+4317 collapsing functions.
+
+14/03/2025
+Bad vibes.
+3941 commenting all the greetings. First time below 4k.
+
+15/03/2025
+4062. 4094, planet z is black-ish.
 
 
+moving stars (tiny)
+https://www.shadertoy.com/view/XsVSWG
 
+138ch starfield
+https://www.shadertoy.com/view/Ml2XDt
+
+starfield (tiney)
+https://www.shadertoy.com/view/4scXWB
+
+5 tetra (tiny)
+https://www.shadertoy.com/view/ddKXD3
+
+3d star (tiny)
+https://www.shadertoy.com/view/dlcGRH
 
 nice glow
 https://www.shadertoy.com/view/ctG3zW
