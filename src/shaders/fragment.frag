@@ -9,7 +9,7 @@ vec2 ir=vec2(gl_TexCoord[0].y,gl_TexCoord[0].z),xy=gl_FragCoord.xy-.5*ir,ggg=xy+
 
 vec2 bskygrad( ivec2 z )
 {
-    int n = z.x+z.y*21111;
+    int n=z.x+z.y*21111;
     n=n*n*(n<<13)^n;
     float g=(n*15+21+19)>>16;
     return vec2(cos(g),sin(g));
@@ -17,7 +17,7 @@ vec2 bskygrad( ivec2 z )
 
 float newnoise(vec2 p)
 {
-    ivec2 i = ivec2(floor(p));
+    ivec2 i=ivec2(floor(p));
     vec2 f=fract(p),u=f*f*(3-2*f);
     return mix( mix( dot( bskygrad( i+ivec2(0,0) ), f-vec2(0.0,0.0) ), 
                      dot( bskygrad( i+ivec2(1,0) ), f-vec2(1.0,0.0) ), u.x),
@@ -29,8 +29,8 @@ vec3 bskyFun()
 {
     vec2 p = xy/ir.y;
     
-    float f,w,i;
-    for (i=0;i<80;i++)
+    float f,w=0,i=0;
+    for (;i<80;i++)
     {        
         vec2 fp = p*i*.1/(2*p.y+1.8);
         fp.x -= ie*.5;
@@ -43,9 +43,10 @@ vec3 bskyFun()
     }
     w /= 59.5;
     
-    vec2 uv=xy/ir+.5,n = uv*(1. - uv) * 6;
-    vec3 col = pow(n.x*n.y,.5)*mix(vec3(smoothstep(-.11,1.1,w)),vec3(6.,2.,.5), smoothstep(.05,1.,w));
-    return col*2*vec3(.82,1.5,2.5);
+    vec2 uv=xy/ir+.5;
+    uv=ie>-60?uv:ie>-72?mod(uv,.25)/.5:mod(uv,.125)/.5;
+    vec2 n = uv*(1. - uv) * 5;
+    return pow(n.x*n.y,.5)*mix(vec3(smoothstep(-.11,1.1,w)),vec3(6.,2.,.5), smoothstep(.05,1.,w))*2*vec3(.82,1.5,2.5);
 }
 
 //
@@ -54,19 +55,17 @@ vec3 bskyFun()
 
 // starback&planetxyz
 
-//#define rot(a) mat2(cos(a),-sin(a),sin(a),cos(a))
 #define rot(x) mat2(cos(x+vec4(0,33,11,0)))
 
 void doStarBackgroundAndPlanetZ(vec2 I)
 {
     // starback
-    //vec2 p,r=ir,U=ie<32?vec2(0):xy/ir.y;
-    vec2 p,r=ir,U=xy/ir.y;
+    vec2 p,U=xy/ir.y;
     for(float i=0.,f; i++<12;
-        o += (1e1-f)/max(length(p=mod((I+I-r)/r.y*f*
+        o += (1e1-f)/max(length(p=mod((I+I-ir)/ir.y*f*
         mat2(rot(i)),3.)-1.)
-        -vec4(5,6,9,0)/116e1,.01)/3e2)
-        f = mod(i-ie*.1,1e1);
+        -vec4(5,6,9,0)/1000,.01)/3e2)
+        f = mod(i-ie*.1,10);
 
     // planetZ
     vec4 oo=o;
@@ -76,54 +75,18 @@ void doStarBackgroundAndPlanetZ(vec2 I)
 	o = (1.-o)/3.2*min(o+I.x+I.y*.8, -.1) + // Lighting
         vec4(.5,.2,.7+I.x, 0) / dot(I*.5,I*1.3)*o; // Radiant light
     
-    o.rgb=ie<32?length(vec2(U.x,1.6+U.y-(ie*.007)))<1.05?o.rgb*.4:(.5*oo.rgb)+(.5*o.rgb):length(U)<.25?o.rgb:(.5*oo.rgb)+(.5*o.rgb);
+    o.rgb=ie<32?length(vec2(U.x,1.6+U.y-(ie*.007)))<1.05?o.rgb*.4:(.3*oo.rgb)+(.7*o.rgb):length(U)<.25?o.rgb:(.3*oo.rgb)+(.7*o.rgb);
 }
 
 //
 // part 2-3
 //
 
-// lscape
-
-vec2 lscapefield(vec3 p) 
-{
-    vec3 l = vec3(1.2);
-	float s=2.,e,f,o;
-	for(e=f=p.y;s<8e2;s*=1.6)
-            p.xz*=rot(s),
-            e+=abs(dot(sin(p*s)/s,.3*l)),
-            f+=abs(dot(sin(p.xz*s*.5)/s,l.xz));
-	o = 1.+ (f>.01?e:-exp(-f*f));
-    return vec2(max(o,0),min(f,max(e,.02)));
-}
-
-vec3 landScape( in vec3 ro, vec3 rd )
-{
-    float t=2,dt=.1,c,f;
-    vec3 col;
-    for (int i=0;i<80;i++)
-    {                
-        vec2 v = lscapefield(ro+t*rd);  
-        c=v.x, f=v.y;
-        t+=dt*f;
-        dt*=1.03;
-        col=.95*col+.09*vec3(c*c*c,c*c,c);	
-    }
-    return col;
-}
-
-vec4 doLandscape(vec2 p,vec2 q,vec3 rols)
-{
-    vec3 ta,ww = normalize( ta - rols ),uu = normalize( cross(ww,vec3(0,1,0) ) ),vv = normalize( cross(uu,ww)),rd = normalize( p.x*uu + p.y*vv + 2.0*ww );
-    rols.z-=ie*.4;
-    return vec4(.55*(log(.35+landScape(rols,rd))),1);
-}
-
 // new flare
 
 float sdHex(vec2 p)
 {
-	vec2 q = vec2(p.x*2.0*0.57,p.y+p.x*0.57);
+	vec2 q = vec2(p.x*2.0*0.6,p.y+p.x*0.6);
 	return dot(step(q.xy,q.yx), 1-q.yx);
 }
 
@@ -137,22 +100,53 @@ vec3 renderhex(vec2 uv, vec2 p, float s, vec3 col){
     return vec3(0);
 }
 
-vec3 renderLensFlare(vec2 uv, vec2 light)
+// lscape
+
+vec2 lscapefield(vec3 p) 
 {
-    vec3 col=renderhex(uv, -light*0.25, 1.4, vec3(0.25,0.75,0))+
-    renderhex(uv, light*0.25, 0.5, vec3(1,.5,.5))+
-    renderhex(uv, light*0.1, 1.6, vec3(1,1,1));
-    col += fpow(1-abs(distance(light*.8,uv)-.7),.9)*vec3(.1,0.05,0);
-    col+=vec3(.7)*fpow(max(1-distance(uv,light),0),.5);
-    return col/(1+distance(uv,light));
+    vec3 l = vec3(1.2);
+	float s=2.,e,f,n;
+	for(e=f=p.y;s<8e2;s*=1.6)
+            p.xz*=rot(s),
+            e+=abs(dot(sin(p*s)/s,.3*l)),
+            f+=abs(dot(sin(p.xz*s*.5)/s,l.xz));
+	n = 1.+ (f>.01?e:-exp(-f*f));
+    return vec2(max(n,0),min(f,max(e,.02)));
 }
 
-//
-
-void doSpike(vec2 c)
+vec3 landScape(vec3 ro, vec3 rd )
 {
-    vec3 p,q=vec3(0,ie<36?36-ie:0,9),a,s=(vec4(c,0,1).rgb*2.-ir.xyx)/ir.x;
-    float w,d,i=0.;
+    float t=2,dt=.1,c,f,i;
+    vec3 col=vec3(0);
+    for (i=0;i<80;i++)
+    {                
+        vec2 v = lscapefield(ro+t*rd);  
+        c=v.x, f=v.y;
+        t+=dt*f;
+        dt*=1.03;
+        col=.95*col+.09*vec3(c*c*c,c*c,c);	
+    }
+    return col;
+}
+
+void doLandscapeAndTri(vec2 p2,vec2 q2,vec3 rols,vec2 c)
+{
+    vec2 light=vec2(-1,.6),uv=xy/ir.y*2;
+    vec3 ta=vec3(0),ww = normalize( ta - rols ),
+    uu = normalize( cross(ww,vec3(0,1,0) ) ),
+    vv = normalize( cross(uu,ww)),
+    rd = normalize( p2.x*uu + p2.y*vv + 2.0*ww ),p,
+    q=vec3(0,ie<36?36-ie:0,9),a,s=(vec4(c,0,1).rgb*2.-ir.xyx)/ir.x,
+    col=
+    renderhex(uv, -light*0.25, 1.4, vec3(0.25,0.75,0))+
+    renderhex(uv, light*0.25, 0.5, vec3(1,.5,.5));//+renderhex(uv, light*0.1, 1.6, vec3(1,1,1));
+    col+=fpow(1-abs(distance(light*.8,uv)-.7),.9)*vec3(.1,0.05,0);
+    col+=vec3(.7)*fpow(max(1-distance(uv,light),0),.5);
+
+    rols.z-=ie*.4;
+    o.rgb=.55*(log(.35+landScape(rols,rd)));
+
+    float w,d,i=0;
     for(;i<80.;i++,q+=.5*s*d)
         for(d=w=1.+ie;w>ie;w-=1.2)
         {
@@ -161,22 +155,26 @@ void doSpike(vec2 c)
             d=min(d,length(p.xz-vec2(p.y,ie<42?1:.1)*a.z/p.z)*.6-.1);
         }
     o.rgb=d<.1?fwidth(q*10.)*vec3(.4,.2,.1):o.rgb;
+
+    // flare
+    o.rgb+=col/(1+distance(uv,light));
 }
 
 //
 //
 //
 
+// #define fade(t,dt) smoothstep(0.,dt,abs(ie-t))
+
 void main() 
 {
     // bluesky, part3
-    if (ie<0) { o=vec4(bskyFun(),1); return; }
+    if (ie<0) { o.rgb=bskyFun(); return; }
 
     // part 1,stars+planet
     if ((ie<32)||((ie>=78)&&(ie<200)))
     {
         doStarBackgroundAndPlanetZ(ggg);
-        //doPlanetZ(xy+.5*ir);
     }
     // part 2
     else
@@ -186,9 +184,7 @@ void main()
         vec2 q=xy/ir+.5,pl=ie<36?-1+2*q:-1.62 +2.72*q;
         pl.x*=ir.x/ir.y;
 
-        o=doLandscape(pl,q,ie<36?vec3(0,2,2):ie>=42?vec3(0,3.1,.1):vec3(2.1,1.1,-2));
-        doSpike(ggg);
-        o+=renderLensFlare(xy/ir.y*2,vec2(-1,.6)).xyzz;
+        doLandscapeAndTri(pl,q,ie<36?vec3(0,2,2):ie>=42?vec3(0,3.1,.1):vec3(2.1,1.1,-2),ggg);
     }
 
     // fadein

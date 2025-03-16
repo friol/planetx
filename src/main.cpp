@@ -44,26 +44,6 @@
 // static allocation saves a few bytes
 static int pidMain;
 
-/*void drawText(float posx, float posy, char* txt)
-{
-	((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(0);
-	glRasterPos2f(posx,posy);
-	glCallLists(strlen(txt), GL_UNSIGNED_BYTE, txt);
-}*/
-
-/*void glHex(float x, float y, float k)
-{
-	float ln = k; float lnp04 = ln * 0.4; float lnp14 = ln * 1.4;
-	glBegin(GL_POLYGON);
-	glVertex2f(x+ln,y);
-	glVertex2f(x+ lnp04,y+ lnp14);
-	glVertex2f(x- lnp04,y+ lnp14);
-	glVertex2f(x-ln,y);
-	glVertex2f(x- lnp04,y- lnp14);
-	glVertex2f(x+ lnp04,y- lnp14);
-	glEnd();
-}*/
-
 #ifndef EDITOR_CONTROLS
 #pragma code_seg(".main")
 void entrypoint(void)
@@ -89,7 +69,7 @@ int __cdecl main(int argc, char* argv[])
 			// you can create a pseudo fullscreen window by similarly enabling the WS_MAXIMIZE flag as above
 			// in which case you can replace the resolution parameters with 0s and save a couple bytes
 			// this only works if the resolution is set to the display device's native resolution
-			HDC hDC = GetDC(CreateWindow((LPCSTR)0xC018, 0, WS_POPUP | WS_VISIBLE, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), 0, 0, 0, 0));
+			HDC hDC = GetDC(CreateWindow((LPCSTR)0xC018, 0, WS_POPUP | WS_VISIBLE, 0, 0, p1,p2, 0, 0, 0, 0));
 		#endif
 	#endif
 
@@ -113,11 +93,9 @@ int __cdecl main(int argc, char* argv[])
 #endif 
 
 	pidMain = ((PFNGLCREATESHADERPROGRAMVPROC)wglGetProcAddress("glCreateShaderProgramv"))(GL_FRAGMENT_SHADER, 1, &fragment_frag);
-	//pidPart2= ((PFNGLCREATESHADERPROGRAMVPROC)wglGetProcAddress("glCreateShaderProgramv"))(GL_FRAGMENT_SHADER, 1, &part2_frag);
 
 	// init font
 	const HFONT mainFont = CreateFont(45, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ANTIALIASED_QUALITY, 0, "Arial");
-	//const HFONT mainFont = CreateFont(45, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_DONTCARE | DEFAULT_PITCH, "Verdana");
 	SelectObject(hDC, mainFont);
 	wglUseFontBitmaps(hDC, 0, 256, 0);
 
@@ -173,11 +151,10 @@ int __cdecl main(int argc, char* argv[])
 #define HEXROWS 16
 #define HEXCOLS 10
 
-			//p0 += 16000;
+			//p0 += 50000;
 
 			glLoadIdentity();
 			((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidMain);
-			//glTexCoord3i(p0, p1, p2);
 			glTexCoord3i(p0, p1, p2);
 			if ((p0 >= REALFADEP3END) && (p0 < PART4START))
 			{
@@ -237,10 +214,10 @@ int __cdecl main(int argc, char* argv[])
 #define NUM_TEXTS 4
 			textTimeline tlarr[NUM_TEXTS] =
 			{
-				{0.7f,-0.75f,6000,"F R I O L"},
-				{-0.95f,0.75f,12000,"REVISION 2o25"},
-				{-0.18f,0.02f,18000,"P L A N E T  X"},
-				{0.6f,-0.8f,54000,"KEEP FLYING."},
+				{0.75f,-0.85f,6000,"F R I O L"},
+				{-0.95f,0.75f,12000,"@REVISION 2o25"},
+				{-0.15f,0.0f,18000,"P L A N E T  X"},
+				{0.65f,-0.85f,54000,"KEEP FLYING."},
 				/*{0.5f,0.7f,55000,"SK"},
 				{0.5f,0.6f,61000,"ASD"},
 				{0.5f,0.6f,56000,77000,"DEATHSTAR"},
@@ -261,13 +238,15 @@ int __cdecl main(int argc, char* argv[])
 
 			for (unsigned int i = 0;i < NUM_TEXTS;i++)
 			{
-				int pend = i == 0 ? 9000 : i == 1 ? 15000 : i == 2 ? 30000 : 77000;
+				int pend = i == 0 ? 10000 : i == 1 ? 16000 : i == 2 ? 30000 : 77000;
 				if ((p0 >= tlarr[i].positionStart) && (p0 < pend))
 				{
 					//drawText(tlarr[i].px,tlarr[i].py,tlarr[i].str);
 					((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(0);
 					glRasterPos2f(tlarr[i].px, tlarr[i].py);
+					//glEnable(GL_POLYGON_SMOOTH);
 					glCallLists(strlen(tlarr[i].str), GL_UNSIGNED_BYTE, tlarr[i].str);
+					//glDisable(GL_POLYGON_SMOOTH);
 				}
 			}
 

@@ -89,6 +89,14 @@ Bad vibes.
 
 15/03/2025
 4062. 4094, planet z is black-ish.
+4093. 4091. 4089. 4082. 4077 collapsing more functions.
+4094 with part 3 screen splits.
+
+16/03/2025
+Better splits in 3rd part.
+pellicu$ warned me about uninitialized vars. New fear unlocked.
+Vars initialized (I hope). 4093.
+
 
 
 moving stars (tiny)
