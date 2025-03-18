@@ -97,6 +97,12 @@ Better splits in 3rd part.
 pellicu$ warned me about uninitialized vars. New fear unlocked.
 Vars initialized (I hope). 4093.
 
+18/03/2025
+One month to revision. 
+
+
+
+
 
 
 moving stars (tiny)

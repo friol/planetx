@@ -151,7 +151,7 @@ int __cdecl main(int argc, char* argv[])
 #define HEXROWS 16
 #define HEXCOLS 10
 
-			//p0 += 50000;
+			//p0 += 27000;
 
 			glLoadIdentity();
 			((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidMain);
