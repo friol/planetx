@@ -33,7 +33,7 @@ vec3 bskyFun()
     for (;i<80;i++)
     {        
         vec2 fp = p*i*.1/(2*p.y+1.8);
-        fp.x -= ie*.5;
+        fp.x += ie*.5;
         mat2 m = mat2( 1.6,  1.2, -1.2,  1.6 );
         f  = .5*newnoise(fp); fp = m*fp*1.1;
 		f += .25*newnoise(fp); fp*=m;
@@ -44,7 +44,7 @@ vec3 bskyFun()
     w /= 60;
     
     vec2 uv=xy/ir+.5;
-    uv=ie>-60?uv:ie>-72?2*mod(uv,.25):2*mod(uv,.125);
+    uv=ie<60?uv:ie<72?2*mod(uv,.25):2*mod(uv,.125);
     vec2 n = uv*(1. - uv) * 5;
     return pow(n.x*n.y,.5)*mix(vec3(smoothstep(-.11,1.1,w)),vec3(6.,2.,.5), smoothstep(.05,1.,w))*2*vec3(.82,1.5,2.5);
 }
@@ -163,6 +163,56 @@ void doLandscapeAndTri(vec2 p2,vec2 q2,vec3 rols,vec2 c)
 }
 
 //
+// hexa
+//
+
+// st.IQ's hex
+float hex(vec2 p, float r) 
+{
+  p.xy = p.yx;
+  vec3 k = vec3(-sqrt(.75),.5,1.0/sqrt(3));
+  p = abs(p);
+  p -= 2*min(dot(k.xy,p),0.0)*k.xy;
+  p -= vec2(clamp(p.x, -k.z*r, k.z*r), r);
+  return length(p);
+}
+
+vec2 hextile(inout vec2 p) 
+{
+  vec2 sz = vec2(1,sqrt(3)),hsz = sz/2,p1 = mod(p, sz)-hsz,p2 = mod(p - hsz, sz)-hsz,p3 = dot(p1, p1) < dot(p2, p2) ? p1 : p2,n = ((p3 - p + hsz)/sz);
+  p = p3;
+  return n-vec2(.5);
+}
+
+vec3 hexTransition(vec2 p, vec3 from, vec3 to, float m) 
+{
+  m = clamp(m,0,1);
+  float hz = .25;
+  vec2 hp = 4*p;
+  vec2 hn = hextile(hp)*hz*-vec2(-1., sqrt(3));
+  float r = sdHex(hn+.25);
+  
+  float fi = smoothstep(0.0, 0.1, m);
+  float fo = smoothstep(0.9, 1.0, m);
+
+  float sz = .25+.25*tanh(((r+hn.x + hn.y-4+m*8)));
+  
+  float mm = smoothstep(0,0, -(hex(hp, sz)-1.*sz)*hz);
+  mm = mix(0.0, mm, fi);
+  mm = mix(mm, 1.0, fo);
+  
+  return mix(from, to, mm);
+}
+
+// triangle trans
+
+float fEquilateralTriangle(vec2 p,float r )
+{
+    float k = sqrt(3);
+    return -p.y-.5*k*max(abs(p.x)-k*p.y,0) + r*(1/k);
+}
+
+//
 //
 //
 
@@ -170,23 +220,37 @@ void doLandscapeAndTri(vec2 p2,vec2 q2,vec3 rols,vec2 c)
 
 void main() 
 {
-    // bluesky, part3
-    if (ie<0) { o.rgb=bskyFun(); return; }
+    vec2 q=xy/ir+.5,pl=ie<36?-1+2*q:-1.62 +2.72*q;
+    pl.x*=ir.x/ir.y;
 
-    // part 1,stars+planet
-    if ((ie<32)||((ie>=78)&&(ie<200)))
+    // part1/tri crossfade
+    if ((ie>=28)&&(ie<32))
     {
         doStarBackgroundAndPlanetZ(ggg);
+
+	    if (fEquilateralTriangle(pl,(ie-28)*2)>0)
+        {
+            doLandscapeAndTri(pl,q,vec3(0,2,2),ggg);
+        }
+    }
+    // part 1/4,stars+planet
+    else if ((ie<32)||(ie>=78))
+    {
+        doStarBackgroundAndPlanetZ(ggg);
+    }
+    else if ((ie>=54)&&(ie<78))
+    {
+        o.rgb=bskyFun();
     }
     // part 2
     else
     {
-        ie=ie>200?ie-200:ie;
-
-        vec2 q=xy/ir+.5,pl=ie<36?-1+2*q:-1.62 +2.72*q;
-        pl.x*=ir.x/ir.y;
-
         doLandscapeAndTri(pl,q,ie<36?vec3(0,2,2):ie>=42?vec3(0,3.1,.1):vec3(2.1,1.1,-2),ggg);
+
+        if ((ie>=50)&&(ie<54))
+        {
+            o.rgb = hexTransition(pl,o.rgb, bskyFun(), (ie-50)*.25);
+        }
     }
 
     // fadein

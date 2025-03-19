@@ -99,8 +99,12 @@ Vars initialized (I hope). 4093.
 
 18/03/2025
 One month to revision. 
+Integrated hex crossfade into the shader, 4089.
+4083. 4076.
 
-
+19/03/2025
+Integrated tri crossfade into the shader, 4010.
+3996 with heavy release.
 
 
 

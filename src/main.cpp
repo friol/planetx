@@ -142,67 +142,11 @@ int __cdecl main(int argc, char* argv[])
 			glColor3ui(MMTime.u.sample, 0, 0);
 #endif
 
-#define FADESTART 28000
-#define FADEEND 32000
-#define FADEP3START 50000
-#define FADEP3END 56000
-#define REALFADEP3END 53000
-#define PART4START 78000
-#define HEXROWS 16
-#define HEXCOLS 10
+			//p0 += 25000;
 
-			//p0 += 27000;
-
-			glLoadIdentity();
 			((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidMain);
 			glTexCoord3i(p0, p1, p2);
-			if ((p0 >= REALFADEP3END) && (p0 < PART4START))
-			{
-				glTexCoord3i(-p0, p1, p2);
-			}
 			glRects(-1, -1, 1, 1);
-
-			if ((p0 >= FADESTART) && (p0 < FADEEND))
-			{
-				glTexCoord3i(p0+200000, p1, p2);
-				float k = ((((float)p0 - FADESTART) / (FADESTART-FADEEND))*4.0f);
-				glBegin(GL_TRIANGLES);
-				glVertex2f(0.0f,k);
-				glVertex2f(k*0.85f, -k*1.3f);
-				glVertex2f(-k*0.85f, -k*1.3f);
-				glEnd();
-			}
-			else if ((p0 >= FADEP3START) && (p0 < REALFADEP3END))
-			{
-				float k = (((((float)p0 - FADEP3START) / (FADEP3END - FADEP3START))))/8;
-
-				glTexCoord3i(-p0, p1, p2);
-
-				glScalef(3,3,3);
-
-				float ypos = .4f;
-				for (int r = 0;r < HEXROWS;r++)
-				{
-					float xpos = -0.8f;
-					if (r%2) xpos -= 0.072f;
-					for (int x = 0;x < HEXCOLS;x++)
-					{
-						/*glHex(xpos, ypos, k);*/
-						float ln = k; float lnp04 = ln * 0.4; float lnp14 = ln * 1.4;
-						glBegin(GL_POLYGON);
-						glVertex2f(xpos + ln, ypos);
-						glVertex2f(xpos + lnp04, ypos + lnp14);
-						glVertex2f(xpos - lnp04, ypos + lnp14);
-						glVertex2f(xpos - ln, ypos);
-						glVertex2f(xpos - lnp04, ypos - lnp14);
-						glVertex2f(xpos + lnp04, ypos - lnp14);
-						glEnd();
-
-						xpos += 0.145f;
-					}
-					ypos -= 0.07f;
-				}
-			}
 
 			typedef struct
 			{
