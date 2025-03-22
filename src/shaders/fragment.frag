@@ -1,7 +1,10 @@
 #version 130
+
+uniform int iTime,xrez,yrez;
 out vec4 o;
-float ie=gl_TexCoord[0].x/1000;
-vec2 ir=vec2(gl_TexCoord[0].y,gl_TexCoord[0].z),xy=gl_FragCoord.xy-.5*ir,ggg=xy+.5*ir;
+
+float ie=iTime/float(1000);
+vec2 ir=vec2(xrez,yrez),xy=gl_FragCoord.xy-.5*ir,ggg=xy+.5*ir;
 
 //
 // part 3
@@ -56,27 +59,35 @@ vec3 bskyFun()
 // starback&planetxyz
 
 #define rot(x) mat2(cos(x+vec4(0,33,11,0)))
+#define circle(uv,blur,a) smoothstep(0., blur, a - length(uv))
 
 void doStarBackgroundAndPlanetZ(vec2 I)
 {
     // starback
+    vec4 oo=vec4(0);
     vec2 p,U=xy/ir.y;
     for(float i=0.,f; i++<12;
-        o += (1e1-f)/max(length(p=mod((I+I-ir)/ir.y*f*
+        oo += (1e1-f)/max(length(p=mod((I+I-ir)/ir.y*f*
         mat2(rot(i)),3.)-1.)
         -vec4(.01),.01)/3e2)
         f = mod(i-ie*.1,10);
 
     // planetZ
-    vec4 oo=o;
-    I.y+=ie<32?15e2-ie*9:0;
-    I -= o.xy = ir.xy*.5; // Center
-    o = .8-sqrt(max(o-o,1.-dot(I/=ie<32?o.y*2:o.y*.5,I))); // Depth
-	o = (1.-o)/3.2*min(o+I.x+I.y*.8, -.1) + // Lighting
+
+    U.y-=ie<32?-1.3+ie*.015:0;
+    float a=ie<32?2:1,c = circle(U * 2.45, 1.,a)*1.12 - circle(U * 2.86, 0.7,a)*.21;
+    c-=circle(vec2(U.x - sin(3) * .85, 1.8*U.y - cos(3) * .65) * .8, 1.,a)*.1; 
+    vec3 col = vec3(c) * vec3(1., 0., 0.5)+vec3(smoothstep(0.2, 0.7, c))*vec3(1., 1., 0.)+vec3(smoothstep(0.4, 0.55, c));
+    o.rgb=col+oo.rgb*.2+(oo.rgb*vec3(0.3*newnoise(U*1.1),0.2*newnoise(U*1.7),0.4*newnoise(U*2.2)));
+
+    /*{
+        I -= o.xy = ir.xy*.5; // Center
+        o = .8-sqrt(max(o-o,1.-dot(I/=o.y*.5,I))); // Depth
+        o = (1.-o)/3.2*min(o+I.x+I.y*.8, -.1) + // Lighting
         vec4(.5,.2,.7+I.x, 0)/dot(I*.5,I*1.3)*o; // Radiant light
-    o*=ie<32?newnoise(U*1.7):1;
-    
-    o.rgb=ie<32?length(vec2(U.x,1.6+U.y-(ie*.007)))<1.05?o.rgb*.4:(.3*oo.rgb)+(.7*o.rgb):length(U)<.25?o.rgb:(.3*oo.rgb)+(.7*o.rgb);
+        //o*=ie<32?newnoise(U*1.7):1;
+        o.rgb=length(U)<.25?o.rgb:(.3*oo.rgb)+(.7*o.rgb);
+    }*/
 }
 
 //
@@ -212,6 +223,7 @@ float fEquilateralTriangle(vec2 p,float r )
     return -p.y-.5*k*max(abs(p.x)-k*p.y,0) + r*(1/k);
 }
 
+
 //
 //
 //
@@ -220,6 +232,7 @@ float fEquilateralTriangle(vec2 p,float r )
 
 void main() 
 {
+    o=vec4(0);
     vec2 q=xy/ir+.5,pl=ie<36?-1+2*q:-1.62 +2.72*q;
     pl.x*=ir.x/ir.y;
 

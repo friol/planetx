@@ -115,7 +115,7 @@ int __cdecl main(int argc, char* argv[])
 		ShowCursor(0);
 
 		unsigned long startTime = timeGetTime();
-		int p0;
+		unsigned int p0;
 
 		// mainloop
 		do
@@ -142,10 +142,15 @@ int __cdecl main(int argc, char* argv[])
 			glColor3ui(MMTime.u.sample, 0, 0);
 #endif
 
-			//p0 += 25000;
+			//p0 += 76000;
 
 			((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidMain);
-			glTexCoord3i(p0, p1, p2);
+
+			((PFNGLUNIFORM1IPROC)wglGetProcAddress("glUniform1i"))(((PFNGLGETUNIFORMLOCATIONPROC)wglGetProcAddress("glGetUniformLocation"))(pidMain, VAR_iTime), p0);
+			((PFNGLUNIFORM1IPROC)wglGetProcAddress("glUniform1i"))(((PFNGLGETUNIFORMLOCATIONPROC)wglGetProcAddress("glGetUniformLocation"))(pidMain, VAR_xrez), p1);
+			((PFNGLUNIFORM1IPROC)wglGetProcAddress("glUniform1i"))(((PFNGLGETUNIFORMLOCATIONPROC)wglGetProcAddress("glGetUniformLocation"))(pidMain, VAR_yrez), p2);
+
+			//glTexCoord3i(p0, p1, p2);
 			glRects(-1, -1, 1, 1);
 
 			typedef struct
@@ -182,7 +187,7 @@ int __cdecl main(int argc, char* argv[])
 
 			for (unsigned int i = 0;i < NUM_TEXTS;i++)
 			{
-				int pend = i == 0 ? 10000 : i == 1 ? 16000 : i == 2 ? 30000 : 77000;
+				unsigned int pend = i == 0 ? 10000 : i == 1 ? 16000 : i == 2 ? 30000 : 77000;
 				if ((p0 >= tlarr[i].positionStart) && (p0 < pend))
 				{
 					//drawText(tlarr[i].px,tlarr[i].py,tlarr[i].str);

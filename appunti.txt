@@ -106,6 +106,10 @@ Integrated hex crossfade into the shader, 4089.
 Integrated tri crossfade into the shader, 4010.
 3996 with heavy release.
 
+21/03/2025
+Fixed (I hope) on my laptop (with uniforms, again).
+
+
 
 
 
