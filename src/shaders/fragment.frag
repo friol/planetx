@@ -28,29 +28,35 @@ float newnoise(vec2 p)
                      dot( bskygrad( i+ivec2(1,1) ), f-vec2(1.0,1.0) ), u.x), u.y);
 }
 
-vec3 bskyFun()
+vec3 bskyFun(vec2 I)
 {
-    vec2 p = xy/ir.y;
-    
-    float f,w=0,i=0;
-    for (;i<80;i++)
-    {        
-        vec2 fp = p*i*.1/(2*p.y+1.8);
-        fp.x += ie*.5;
-        mat2 m = mat2( 1.6,  1.2, -1.2,  1.6 );
-        f  = .5*newnoise(fp); fp = m*fp*1.1;
-		f += .25*newnoise(fp); fp*=m;
-        f += .125*newnoise(fp); fp*=m;
-        f = smoothstep(-.04,.7,f);
-        w += f;
+    vec3 O=vec3(0);
+
+    float i=0,z;
+    for(;i<1;i+=.01)
+    {
+        vec2 v=ir.xy,p=(I-v)/v.y*i;
+
+        //Sphere distortion and compute z
+        z=max(1-dot(p,p),0);
+
+        p/=.2+sqrt(z);
+
+        // rot8        
+        p+=ie*.1;
+
+        //Mirror quadrants
+        v=abs(fract(p*newnoise(p*sin(ie*.01)))-.5)*newnoise(p*3);
+        //v=mod(v,.125+.05*sin(ie));
+        //v=ie<60?mod(v,.25):ie<72?mod(v,.125):v;
+
+        //Add color and fade outward
+        O+=vec3(1,2,4)/2e3*z/(abs(max(v.x*.5+v,v).y-.01)+.1-i*.1);
     }
-    w /= 60;
-    
-    vec2 uv=xy/ir+.5;
-    uv=ie<60?uv:ie<72?2*mod(uv,.25):2*mod(uv,.125);
-    vec2 n = uv*(1. - uv) * 5;
-    return pow(n.x*n.y,.5)*mix(vec3(smoothstep(-.11,1.1,w)),vec3(6.,2.,.5), smoothstep(.05,1.,w))*2*vec3(.82,1.5,2.5);
+
+    return tanh(O*O);
 }
+
 
 //
 // part 1 stuff
@@ -74,20 +80,11 @@ void doStarBackgroundAndPlanetZ(vec2 I)
 
     // planetZ
 
-    U.y-=ie<32?-1.3+ie*.015:0;
-    float a=ie<32?2:1,c = circle(U * 2.45, 1.,a)*1.12 - circle(U * 2.86, 0.7,a)*.21;
+    U.y-=ie<32?-2+ie*.01:0;
+    float a=ie<32?4:1,c = circle(U * 2.45, 1.,a)*1.12 - circle(U * 2.85, 0.7,a)*.21;
     c-=circle(vec2(U.x - sin(3) * .85, 1.8*U.y - cos(3) * .65) * .8, 1.,a)*.1; 
     vec3 col = vec3(c) * vec3(1., 0., 0.5)+vec3(smoothstep(0.2, 0.7, c))*vec3(1., 1., 0.)+vec3(smoothstep(0.4, 0.55, c));
-    o.rgb=col+oo.rgb*.2+(oo.rgb*vec3(0.3*newnoise(U*1.1),0.2*newnoise(U*1.7),0.4*newnoise(U*2.2)));
-
-    /*{
-        I -= o.xy = ir.xy*.5; // Center
-        o = .8-sqrt(max(o-o,1.-dot(I/=o.y*.5,I))); // Depth
-        o = (1.-o)/3.2*min(o+I.x+I.y*.8, -.1) + // Lighting
-        vec4(.5,.2,.7+I.x, 0)/dot(I*.5,I*1.3)*o; // Radiant light
-        //o*=ie<32?newnoise(U*1.7):1;
-        o.rgb=length(U)<.25?o.rgb:(.3*oo.rgb)+(.7*o.rgb);
-    }*/
+    o.rgb=col+oo.rgb*.2+(oo.rgb*vec3(0.7*newnoise(U*1.1),0.0*newnoise(U*1.7),0.9*newnoise(U*2.2)));
 }
 
 //
@@ -98,7 +95,7 @@ void doStarBackgroundAndPlanetZ(vec2 I)
 
 float sdHex(vec2 p)
 {
-	vec2 q = vec2(p.x*2.0*0.6,p.y+p.x*0.6);
+	vec2 q = vec2(p.x*2.0*0.6,p.y+p.x*.6);
 	return dot(step(q.xy,q.yx), 1-q.yx);
 }
 
@@ -181,7 +178,7 @@ void doLandscapeAndTri(vec2 p2,vec2 q2,vec3 rols,vec2 c)
 float hex(vec2 p, float r) 
 {
   p.xy = p.yx;
-  vec3 k = vec3(-sqrt(.75),.5,1.0/sqrt(3));
+  vec3 k = vec3(-.86,.5,1.0/sqrt(3));
   p = abs(p);
   p -= 2*min(dot(k.xy,p),0.0)*k.xy;
   p -= vec2(clamp(p.x, -k.z*r, k.z*r), r);
@@ -195,34 +192,21 @@ vec2 hextile(inout vec2 p)
   return n-vec2(.5);
 }
 
-vec3 hexTransition(vec2 p, vec3 from, vec3 to, float m) 
+vec3 hexTransition(vec2 p,float m) 
 {
-  m = clamp(m,0,1);
-  float hz = .25;
-  vec2 hp = 4*p;
-  vec2 hn = hextile(hp)*hz*-vec2(-1., sqrt(3));
-  float r = sdHex(hn+.25);
-  
-  float fi = smoothstep(0.0, 0.1, m);
-  float fo = smoothstep(0.9, 1.0, m);
-
-  float sz = .25+.25*tanh(((r+hn.x + hn.y-4+m*8)));
-  
-  float mm = smoothstep(0,0, -(hex(hp, sz)-1.*sz)*hz);
-  mm = mix(0.0, mm, fi);
-  mm = mix(mm, 1.0, fo);
-  
-  return mix(from, to, mm);
+  vec2 hp = 4*p,hn = hextile(hp)*.25*-vec2(-1., sqrt(3));
+  float r = sdHex(hn+.25),sz=.25+.25*tanh(((r+hn.x + hn.y-4+m*8))),mm = smoothstep(0,0, -(hex(hp, sz)-sz)*.25);
+  mm = mix(0.0, mm, smoothstep(0.0, 0.1, m));
+  mm = mix(mm, 1.0, smoothstep(0.9, 1.0, m));
+  return mix(o.rgb, bskyFun(ggg), mm);
 }
 
 // triangle trans
 
 float fEquilateralTriangle(vec2 p,float r )
 {
-    float k = sqrt(3);
-    return -p.y-.5*k*max(abs(p.x)-k*p.y,0) + r*(1/k);
+    return -p.y-.5*sqrt(3)*max(abs(p.x)-sqrt(3)*p.y,0) + r*(1/sqrt(3));
 }
-
 
 //
 //
@@ -253,7 +237,7 @@ void main()
     }
     else if ((ie>=54)&&(ie<78))
     {
-        o.rgb=bskyFun();
+        o.rgb=bskyFun(ggg);
     }
     // part 2
     else
@@ -262,10 +246,10 @@ void main()
 
         if ((ie>=50)&&(ie<54))
         {
-            o.rgb = hexTransition(pl,o.rgb, bskyFun(), (ie-50)*.25);
+            o.rgb = hexTransition(pl,(ie-50)*.25);
         }
     }
 
     // fadein
-    o=ie<3?o*(ie/3):o;
+    o=ie<3?o*(ie/3):ie>=86?o*smoothstep(1,0,abs(ie-86)):o;
 }

@@ -109,6 +109,9 @@ Integrated tri crossfade into the shader, 4010.
 21/03/2025
 Fixed (I hope) on my laptop (with uniforms, again).
 
+23/03/2025
+New part 3. Greetings are back, but how many of them?
+4080.
 
 
 

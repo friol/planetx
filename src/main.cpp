@@ -142,10 +142,9 @@ int __cdecl main(int argc, char* argv[])
 			glColor3ui(MMTime.u.sample, 0, 0);
 #endif
 
-			//p0 += 76000;
+			//p0 += 70000;
 
 			((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidMain);
-
 			((PFNGLUNIFORM1IPROC)wglGetProcAddress("glUniform1i"))(((PFNGLGETUNIFORMLOCATIONPROC)wglGetProcAddress("glGetUniformLocation"))(pidMain, VAR_iTime), p0);
 			((PFNGLUNIFORM1IPROC)wglGetProcAddress("glUniform1i"))(((PFNGLGETUNIFORMLOCATIONPROC)wglGetProcAddress("glGetUniformLocation"))(pidMain, VAR_xrez), p1);
 			((PFNGLUNIFORM1IPROC)wglGetProcAddress("glUniform1i"))(((PFNGLGETUNIFORMLOCATIONPROC)wglGetProcAddress("glGetUniformLocation"))(pidMain, VAR_yrez), p2);
@@ -155,23 +154,23 @@ int __cdecl main(int argc, char* argv[])
 
 			typedef struct
 			{
-				float px, py;
+				float py;
 				unsigned int positionStart;
 				char* str;
 			} textTimeline;
 
-#define NUM_TEXTS 4
+#define NUM_TEXTS 8
 			textTimeline tlarr[NUM_TEXTS] =
 			{
-				{0.75f,-0.85f,6000,"F R I O L"},
-				{-0.95f,0.75f,12000,"@REVISION 2o25"},
-				{-0.15f,0.0f,18000,"P L A N E T  X"},
-				{0.65f,-0.85f,54000,"KEEP FLYING."},
-				/*{0.5f,0.7f,55000,"SK"},
-				{0.5f,0.6f,61000,"ASD"},
-				{0.5f,0.6f,56000,77000,"DEATHSTAR"},
-				{0.5f,0.5f,57000,77000,"DARKAGE"},
-				{0.5f,0.4f,58000,77000,"MERCURY"},
+				{-0.85f,6000,"F R I O L"},
+				{0.75f,12000,"@REVISION 2o25"},
+				{0.0f,18000,"P L A N E T  X"},
+				{-0.5f,54000,"GREETS"},
+				{-0.6f,56000,"PELLICUS"},
+				{-0.7f,58000,"MOD3M"},
+				{-0.8f,60000,"PAN"},
+				{-0.9f,62000,"AND YOU"},
+				/*{-0.8f,65000,"AND YOU"},
 				{0.5f,0.3f,59000,77000,"CONSPIRACY"},
 				{0.5f,0.2f,60000,77000,"FUTURE CREW"},
 				{0.5f,0.0f,62000,77000,"RGBA"},
@@ -188,32 +187,14 @@ int __cdecl main(int argc, char* argv[])
 			for (unsigned int i = 0;i < NUM_TEXTS;i++)
 			{
 				unsigned int pend = i == 0 ? 10000 : i == 1 ? 16000 : i == 2 ? 30000 : 77000;
+				float px = i == 0 ? 0.75f : i == 2 ? -0.15f : -0.95f;
 				if ((p0 >= tlarr[i].positionStart) && (p0 < pend))
 				{
-					//drawText(tlarr[i].px,tlarr[i].py,tlarr[i].str);
 					((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(0);
-					glRasterPos2f(tlarr[i].px, tlarr[i].py);
-					//glEnable(GL_POLYGON_SMOOTH);
+					glRasterPos2f(px, tlarr[i].py);
 					glCallLists(strlen(tlarr[i].str), GL_UNSIGNED_BYTE, tlarr[i].str);
-					//glDisable(GL_POLYGON_SMOOTH);
 				}
 			}
-
-			#if POST_PASS
-				glBindTexture(GL_TEXTURE_2D, 1);
-				#if USE_MIPMAPS
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-					glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 0, 0, XRES, YRES, 0);
-					((PFNGLGENERATEMIPMAPPROC)wglGetProcAddress("glGenerateMipmap"))(GL_TEXTURE_2D);
-				#else
-					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-					glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 0, 0, XRES, YRES, 0);
-				#endif
-				((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE0);
-				((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidPost);
-				((PFNGLUNIFORM1IPROC)wglGetProcAddress("glUniform1i"))(0, 0);
-				glRects(-1, -1, 1, 1);
-			#endif
 
 			SwapBuffers(hDC);
 
