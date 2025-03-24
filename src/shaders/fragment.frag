@@ -5,6 +5,7 @@ out vec4 o;
 
 float ie=iTime/float(1000);
 vec2 ir=vec2(xrez,yrez),xy=gl_FragCoord.xy-.5*ir,ggg=xy+.5*ir;
+vec3 zeero=vec3(0);
 
 //
 // part 3
@@ -30,7 +31,7 @@ float newnoise(vec2 p)
 
 vec3 bskyFun(vec2 I)
 {
-    vec3 O=vec3(0);
+    vec3 O=zeero;
 
     float i=0,z;
     for(;i<1;i+=.01)
@@ -39,18 +40,13 @@ vec3 bskyFun(vec2 I)
 
         //Sphere distortion and compute z
         z=max(1-dot(p,p),0);
-
         p/=.2+sqrt(z);
 
         // rot8        
         p+=ie*.1;
 
-        //Mirror quadrants
         v=abs(fract(p*newnoise(p*sin(ie*.01)))-.5)*newnoise(p*3);
-        //v=mod(v,.125+.05*sin(ie));
-        //v=ie<60?mod(v,.25):ie<72?mod(v,.125):v;
 
-        //Add color and fade outward
         O+=vec3(1,2,4)/2e3*z/(abs(max(v.x*.5+v,v).y-.01)+.1-i*.1);
     }
 
@@ -80,11 +76,11 @@ void doStarBackgroundAndPlanetZ(vec2 I)
 
     // planetZ
 
-    U.y-=ie<32?-2+ie*.01:0;
-    float a=ie<32?4:1,c = circle(U * 2.45, 1.,a)*1.12 - circle(U * 2.85, 0.7,a)*.21;
-    c-=circle(vec2(U.x - sin(3) * .85, 1.8*U.y - cos(3) * .65) * .8, 1.,a)*.1; 
-    vec3 col = vec3(c) * vec3(1., 0., 0.5)+vec3(smoothstep(0.2, 0.7, c))*vec3(1., 1., 0.)+vec3(smoothstep(0.4, 0.55, c));
-    o.rgb=col+oo.rgb*.2+(oo.rgb*vec3(0.7*newnoise(U*1.1),0.0*newnoise(U*1.7),0.9*newnoise(U*2.2)));
+    U.y-=ie<32?-2.1+ie*.01:0;
+    float a=ie<32?4:1,c = circle(U*2.4,1,a)*1.1-circle(U*2.8,.7,a)*.2;
+    c-=circle(vec2(U.x - sin(3)*.8,1.8*U.y-cos(3)*.6)*.8,1,a)*.1;
+    vec3 col = vec3(c) * vec3(1., 0., 0.5)+vec3(smoothstep(.1,.7,c))*vec3(1,1,0)+vec3(smoothstep(.4,.5,c));
+    o.rgb=col+oo.rgb*.2+(oo.rgb*vec3(0.7*newnoise(U*1.1),0.0*newnoise(U*1.7),0.9*newnoise(U*2.1)));
 }
 
 //
@@ -95,18 +91,20 @@ void doStarBackgroundAndPlanetZ(vec2 I)
 
 float sdHex(vec2 p)
 {
-	vec2 q = vec2(p.x*2.0*0.6,p.y+p.x*.6);
+	vec2 q = vec2(p.x*2*0.6,p.y+p.x*.6);
 	return dot(step(q.xy,q.yx), 1-q.yx);
 }
 
 #define fpow(x,k) float(x > k ? pow((x-k)/(1.0-k),2) : 0)
 
-vec3 renderhex(vec2 uv, vec2 p, float s, vec3 col){
+vec3 renderhex(vec2 uv, vec2 p, float s, vec3 col)
+{
     uv -= p;
-    if (abs(uv.x) < 0.2*s && abs(uv.y) < 0.2*s){
-        return mix(vec3(0),mix(vec3(0),col,0.1 + fpow(length(uv/s),0.1)*10.0),smoothstep(0.0,0.3,sdHex(abs(uv*5.0/s))));
+    if (abs(uv.x)<.2*s&&abs(uv.y)<.2*s)
+    {
+        return mix(zeero,mix(zeero,col,.1 + fpow(length(uv/s),.1)*10),smoothstep(0.0,0.3,sdHex(abs(uv*5.0/s))));
     }
-    return vec3(0);
+    return zeero;
 }
 
 // lscape
@@ -126,7 +124,7 @@ vec2 lscapefield(vec3 p)
 vec3 landScape(vec3 ro, vec3 rd )
 {
     float t=2,dt=.1,c,f,i;
-    vec3 col=vec3(0);
+    vec3 col=zeero;
     for (i=0;i<80;i++)
     {                
         vec2 v = lscapefield(ro+t*rd);  
@@ -141,7 +139,7 @@ vec3 landScape(vec3 ro, vec3 rd )
 void doLandscapeAndTri(vec2 p2,vec2 q2,vec3 rols,vec2 c)
 {
     vec2 light=vec2(-1,.6),uv=xy/ir.y*2;
-    vec3 ta=vec3(0),ww = normalize( ta - rols ),
+    vec3 ta=zeero,ww = normalize( ta - rols ),
     uu = normalize( cross(ww,vec3(0,1,0) ) ),
     vv = normalize( cross(uu,ww)),
     rd = normalize( p2.x*uu + p2.y*vv + 2.0*ww ),p,

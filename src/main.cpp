@@ -105,14 +105,14 @@ int __cdecl main(int argc, char* argv[])
 		//Leviathan::Song track(L"audio.wav");
 #endif
 
+		ShowCursor(0);
+
 #if USE_AUDIO
 		CreateThread(0, 0, (LPTHREAD_START_ROUTINE)_4klang_render, lpSoundBuffer, 0, 0);
 		waveOutOpen(&hWaveOut, WAVE_MAPPER, &WaveFMT, NULL, 0, CALLBACK_NULL);
 		waveOutPrepareHeader(hWaveOut, &WaveHDR, sizeof(WaveHDR));
 		waveOutWrite(hWaveOut, &WaveHDR, sizeof(WaveHDR));
 #endif
-
-		ShowCursor(0);
 
 		unsigned long startTime = timeGetTime();
 		unsigned int p0;
@@ -135,7 +135,7 @@ int __cdecl main(int argc, char* argv[])
 			p0 = timeGetTime() - startTime;
 
 #if USE_AUDIO
-			waveOutGetPosition(hWaveOut, &MMTime, sizeof(MMTIME));
+			//waveOutGetPosition(hWaveOut, &MMTime, sizeof(MMTIME));
 #endif
 			// it is possible to upload your vars as vertex color attribute (gl_Color) to save one function import
 #if NO_UNIFORMS
@@ -148,7 +148,6 @@ int __cdecl main(int argc, char* argv[])
 			((PFNGLUNIFORM1IPROC)wglGetProcAddress("glUniform1i"))(((PFNGLGETUNIFORMLOCATIONPROC)wglGetProcAddress("glGetUniformLocation"))(pidMain, VAR_iTime), p0);
 			((PFNGLUNIFORM1IPROC)wglGetProcAddress("glUniform1i"))(((PFNGLGETUNIFORMLOCATIONPROC)wglGetProcAddress("glGetUniformLocation"))(pidMain, VAR_xrez), p1);
 			((PFNGLUNIFORM1IPROC)wglGetProcAddress("glUniform1i"))(((PFNGLGETUNIFORMLOCATIONPROC)wglGetProcAddress("glGetUniformLocation"))(pidMain, VAR_yrez), p2);
-
 			//glTexCoord3i(p0, p1, p2);
 			glRects(-1, -1, 1, 1);
 
@@ -159,19 +158,19 @@ int __cdecl main(int argc, char* argv[])
 				char* str;
 			} textTimeline;
 
-#define NUM_TEXTS 8
+#define NUM_TEXTS 9
 			textTimeline tlarr[NUM_TEXTS] =
 			{
 				{-0.85f,6000,"F R I O L"},
 				{0.75f,12000,"@REVISION 2o25"},
 				{0.0f,18000,"P L A N E T  X"},
-				{-0.5f,54000,"GREETS"},
-				{-0.6f,56000,"PELLICUS"},
-				{-0.7f,58000,"MOD3M"},
-				{-0.8f,60000,"PAN"},
-				{-0.9f,62000,"AND YOU"},
-				/*{-0.8f,65000,"AND YOU"},
-				{0.5f,0.3f,59000,77000,"CONSPIRACY"},
+				{-0.4f,54000,"KUDOS"},
+				{-0.5f,56000,"PELLICUS"},
+				{-0.6f,58000,"MOD3M"},
+				{-0.7f,60000,"PAN"},
+				{-0.8f,62000,"CDS"},
+				{-0.9f,64000,"AND YOU"},
+				/*{0.5f,0.3f,59000,77000,"CONSPIRACY"},
 				{0.5f,0.2f,60000,77000,"FUTURE CREW"},
 				{0.5f,0.0f,62000,77000,"RGBA"},
 				{0.5f,-0.1f,63000,77000,"TBL"},
