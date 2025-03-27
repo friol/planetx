@@ -53,8 +53,8 @@ void entrypoint(void)
 int __cdecl main(int argc, char* argv[])
 #endif
 {
-	int p1 = GetSystemMetrics(SM_CXSCREEN);
-	int p2 = GetSystemMetrics(SM_CYSCREEN);
+	unsigned int p1 = GetSystemMetrics(SM_CXSCREEN);
+	unsigned int p2 = GetSystemMetrics(SM_CYSCREEN);
 
 	// initialize window
 	#if FULLSCREEN
@@ -142,7 +142,7 @@ int __cdecl main(int argc, char* argv[])
 			glColor3ui(MMTime.u.sample, 0, 0);
 #endif
 
-			//p0 += 70000;
+			//p0 += 40000;
 
 			((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidMain);
 			((PFNGLUNIFORM1IPROC)wglGetProcAddress("glUniform1i"))(((PFNGLGETUNIFORMLOCATIONPROC)wglGetProcAddress("glGetUniformLocation"))(pidMain, VAR_iTime), p0);
@@ -154,22 +154,21 @@ int __cdecl main(int argc, char* argv[])
 			typedef struct
 			{
 				float py;
-				unsigned int positionStart;
 				char* str;
 			} textTimeline;
 
 #define NUM_TEXTS 9
 			textTimeline tlarr[NUM_TEXTS] =
 			{
-				{-0.85f,6000,"F R I O L"},
-				{0.75f,12000,"@REVISION 2o25"},
-				{0.0f,18000,"P L A N E T  X"},
-				{-0.4f,54000,"KUDOS"},
-				{-0.5f,56000,"PELLICUS"},
-				{-0.6f,58000,"MOD3M"},
-				{-0.7f,60000,"PAN"},
-				{-0.8f,62000,"CDS"},
-				{-0.9f,64000,"AND YOU"},
+				{-0.85f,"F R I O L"},
+				{0.75f,"@REVISION 2o25"},
+				{0.0f,"P L A N E T  X"},
+				{-0.4f,"KUDOS FLOW TO:"},
+				{-0.5f,"PELLICU$"},
+				{-0.6f,"MOD3M"},
+				{-0.7f,"FIZZER"},
+				{-0.8f,"FLOPINE"},
+				{-0.9f,"AND YOU."},
 				/*{0.5f,0.3f,59000,77000,"CONSPIRACY"},
 				{0.5f,0.2f,60000,77000,"FUTURE CREW"},
 				{0.5f,0.0f,62000,77000,"RGBA"},
@@ -186,8 +185,9 @@ int __cdecl main(int argc, char* argv[])
 			for (unsigned int i = 0;i < NUM_TEXTS;i++)
 			{
 				unsigned int pend = i == 0 ? 10000 : i == 1 ? 16000 : i == 2 ? 30000 : 77000;
+				unsigned int pstart = i < 3 ? (i + 1) * 6000 : 54000 + ((i - 3) * 2000);
 				float px = i == 0 ? 0.75f : i == 2 ? -0.15f : -0.95f;
-				if ((p0 >= tlarr[i].positionStart) && (p0 < pend))
+				if ((p0 >= pstart) && (p0 < pend))
 				{
 					((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(0);
 					glRasterPos2f(px, tlarr[i].py);

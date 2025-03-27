@@ -34,7 +34,7 @@ vec3 bskyFun(vec2 I)
     vec3 O=zeero;
 
     float i=0,z;
-    for(;i<1;i+=.01)
+    for(;i<1;i+=.005)
     {
         vec2 v=ir.xy,p=(I-v)/v.y*i;
 
@@ -47,7 +47,7 @@ vec3 bskyFun(vec2 I)
 
         v=abs(fract(p*newnoise(p*sin(ie*.01)))-.5)*newnoise(p*3);
 
-        O+=vec3(1,2,4)/2e3*z/(abs(max(v.x*.5+v,v).y-.01)+.1-i*.1);
+        O+=vec3(1,2,4)/4e3*z/(abs(max(v.x*.5+v,v).y-.01)+.1-i*.1);
     }
 
     return tanh(O*O);
@@ -91,19 +91,16 @@ void doStarBackgroundAndPlanetZ(vec2 I)
 
 float sdHex(vec2 p)
 {
-	vec2 q = vec2(p.x*2*0.6,p.y+p.x*.6);
+	vec2 q = vec2(p.x*2*.6,p.y+p.x*.6);
 	return dot(step(q.xy,q.yx), 1-q.yx);
 }
 
-#define fpow(x,k) float(x > k ? pow((x-k)/(1.0-k),2) : 0)
+#define fpow(x,k) float(x>k?pow((x-k)/(1-k),2):0)
 
 vec3 renderhex(vec2 uv, vec2 p, float s, vec3 col)
 {
     uv -= p;
-    if (abs(uv.x)<.2*s&&abs(uv.y)<.2*s)
-    {
-        return mix(zeero,mix(zeero,col,.1 + fpow(length(uv/s),.1)*10),smoothstep(0.0,0.3,sdHex(abs(uv*5.0/s))));
-    }
+    if (abs(uv.x)<.2*s&&abs(uv.y)<.2*s) return mix(zeero,mix(zeero,col,.1 + fpow(length(uv/s),.1)*10),smoothstep(0.0,0.3,sdHex(abs(uv*5.0/s))));
     return zeero;
 }
 
@@ -145,8 +142,8 @@ void doLandscapeAndTri(vec2 p2,vec2 q2,vec3 rols,vec2 c)
     rd = normalize( p2.x*uu + p2.y*vv + 2.0*ww ),p,
     q=vec3(0,ie<36?36-ie:0,9),a,s=(vec4(c,0,1).rgb*2.-ir.xyx)/ir.x,
     col=
-    renderhex(uv, -light*0.25, 1.4, vec3(0.25,0.75,0))+
-    renderhex(uv, light*0.25, 0.5, vec3(1,.5,.5));//+renderhex(uv, light*0.1, 1.6, vec3(1,1,1));
+    renderhex(uv, -light*.25, 1.4, vec3(.25,.75,0))+
+    renderhex(uv, light*.25, .5, vec3(1,.5,.5));//+renderhex(uv, light*0.1, 1.6, vec3(1,1,1));
     col+=fpow(1-abs(distance(light*.8,uv)-.7),.9)*vec3(.1,0.05,0);
     col+=vec3(.7)*fpow(max(1-distance(uv,light),0),.5);
 
@@ -240,7 +237,7 @@ void main()
     // part 2
     else
     {
-        doLandscapeAndTri(pl,q,ie<36?vec3(0,2,2):ie>=42?vec3(0,3.1,.1):vec3(2.1,1.1,-2),ggg);
+        doLandscapeAndTri(pl,q,ie<36?vec3(0,2,2):ie>=42?vec3(0,3,.1):vec3(2,1,-2),ggg);
 
         if ((ie>=50)&&(ie<54))
         {
