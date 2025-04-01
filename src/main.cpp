@@ -2,9 +2,6 @@
 //
 // going mini
 // friol 2o25
-// * for size optimization: study NO_UNIFORM
-// * part 2
-// * experiment with more typefaces
 //
 
 #define WINDOWS_IGNORE_PACKING_MISMATCH
@@ -142,7 +139,7 @@ int __cdecl main(int argc, char* argv[])
 			glColor3ui(MMTime.u.sample, 0, 0);
 #endif
 
-			//p0 += 40000;
+			//p0 += 52000;
 
 			((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidMain);
 			((PFNGLUNIFORM1IPROC)wglGetProcAddress("glUniform1i"))(((PFNGLGETUNIFORMLOCATIONPROC)wglGetProcAddress("glGetUniformLocation"))(pidMain, VAR_iTime), p0);
@@ -151,47 +148,35 @@ int __cdecl main(int argc, char* argv[])
 			//glTexCoord3i(p0, p1, p2);
 			glRects(-1, -1, 1, 1);
 
-			typedef struct
+#define NUM_TEXTS 13
+			char* tlarr[NUM_TEXTS] =
 			{
-				float py;
-				char* str;
-			} textTimeline;
-
-#define NUM_TEXTS 9
-			textTimeline tlarr[NUM_TEXTS] =
-			{
-				{-0.85f,"F R I O L"},
-				{0.75f,"@REVISION 2o25"},
-				{0.0f,"P L A N E T  X"},
-				{-0.4f,"KUDOS FLOW TO:"},
-				{-0.5f,"PELLICU$"},
-				{-0.6f,"MOD3M"},
-				{-0.7f,"FIZZER"},
-				{-0.8f,"FLOPINE"},
-				{-0.9f,"AND YOU."},
-				/*{0.5f,0.3f,59000,77000,"CONSPIRACY"},
-				{0.5f,0.2f,60000,77000,"FUTURE CREW"},
-				{0.5f,0.0f,62000,77000,"RGBA"},
-				{0.5f,-0.1f,63000,77000,"TBL"},
-				{0.5f,-0.2f,64000,77000,"JAPOTEK"},
-				{0.5f,-0.3f,65000,77000,"RITUAL"},
-				{0.5f,-0.4f,66000,77000,"ZERO DEFECTS"},
-				{0.5f,-0.5f,67000,77000,"PAN"},
-				{0.5f,-0.6f,68000,77000,"PELLICU$"},
-				{0.5f,-0.7f,69000,77000,"FIZZER"},
-				{0.5f,-0.8f,70000,77000,"AND YOU"},*/
+				"F R I O L",
+				"@REVISION 2o25",
+				"P L A N E T  X",
+				"KEEP FLYING",
+				"PELLICU$",
+				"MOD3M",
+				"FIZZER",
+				"KB",
+				"TRUCK",
+				"MERCURY",
+				"FUTURE CREW",
+				"FLOPINE",
+				"AND YOU.",
 			};
 
 			for (unsigned int i = 0;i < NUM_TEXTS;i++)
 			{
 				unsigned int pend = i == 0 ? 10000 : i == 1 ? 16000 : i == 2 ? 30000 : 77000;
-				unsigned int pstart = i < 3 ? (i + 1) * 6000 : 54000 + ((i - 3) * 2000);
+				unsigned int pstart = i < 3 ? (i + 1) * 6000 : 54000 + ((i - 3) * 1500);
 				float px = i == 0 ? 0.75f : i == 2 ? -0.15f : -0.95f;
+				float py = i == 0 ? -0.85f : i == 1 ? 0.75f : 0.1f+((2.0f - (float)i)) * 0.1f;
 				if ((p0 >= pstart) && (p0 < pend))
 				{
 					((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(0);
-					glRasterPos2f(px, tlarr[i].py);
-					glCallLists(strlen(tlarr[i].str), GL_UNSIGNED_BYTE, tlarr[i].str);
+					glRasterPos2f(px,py);
+					glCallLists(strlen(tlarr[i]), GL_UNSIGNED_BYTE, tlarr[i]);
 				}
 			}
 

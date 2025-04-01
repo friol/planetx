@@ -37,22 +37,16 @@ vec3 bskyFun(vec2 I)
     for(;i<1;i+=.005)
     {
         vec2 v=ir.xy,p=(I-v)/v.y*i;
-
-        //Sphere distortion and compute z
         z=max(1-dot(p,p),0);
         p/=.2+sqrt(z);
-
-        // rot8        
         p+=ie*.1;
-
         v=abs(fract(p*newnoise(p*sin(ie*.01)))-.5)*newnoise(p*3);
-
-        O+=vec3(1,2,4)/4e3*z/(abs(max(v.x*.5+v,v).y-.01)+.1-i*.1);
+        vec3 spherecol=ie<60?vec3(1,2,4):ie<66?vec3(4,2,1):vec3(2,3,1);
+        O+=spherecol/4e3*z/(abs(max(v.x*.5+v,v).y-.01)+.1-i*.1);
     }
 
     return tanh(O*O);
 }
-
 
 //
 // part 1 stuff
@@ -135,7 +129,8 @@ vec3 landScape(vec3 ro, vec3 rd )
 
 void doLandscapeAndTri(vec2 p2,vec2 q2,vec3 rols,vec2 c)
 {
-    vec2 light=vec2(-1,.6),uv=xy/ir.y*2;
+    vec2 light=ie<36?vec2(0,-.5+(ie-32)*.1):vec2(-1,.6),
+    uv=xy/ir.y*2;
     vec3 ta=zeero,ww = normalize( ta - rols ),
     uu = normalize( cross(ww,vec3(0,1,0) ) ),
     vv = normalize( cross(uu,ww)),
@@ -150,16 +145,18 @@ void doLandscapeAndTri(vec2 p2,vec2 q2,vec3 rols,vec2 c)
     rols.z-=ie*.4;
     o.rgb=.55*(log(.35+landScape(rols,rd)));
 
-    // flower
-    float w,d,i=0;
-    for(;i<80.;i++,q+=.5*s*d)
-        for(d=w=1.+ie;w>ie;w-=1.2)
-        {
-            p=q;p.xz*=rot(w);p.xy*=rot(1);
-            for(a=abs(p);a.z<a.x||a.z<a.y;p=p.zxy,a=a.zxy);
-            d=min(d,length(p.xz-vec2(p.y,ie<42?1:.1)*a.y/p.z)*.7-.1);
-        }
-    o.bgr=d<.1?fwidth(q*5)*vec3(.1):o.bgr;
+    c.y+=ie<36?450-(ie-28)*50:0;
+
+    float i=0,z;
+    for(;i<1;i+=.005)
+    {
+        vec2 v=ir.xy,p=(2*c-v)/v.y*i;
+        z=max(.05-dot(p,p),0);
+        p/=.2+sqrt(z);
+        p+=ie*.1;
+        v=abs(fract(p*newnoise(p*sin(ie*.01)))-.5)*newnoise(p*3);
+        o.rgb+=vec3(1,2,4)/(i<36?500:4000)*z/(abs(max(v.x*.5+v,v).y-.01)+.1-i*.1);
+    }
 
     // flare
     o.rgb+=col/(1+distance(uv,light));
