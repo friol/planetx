@@ -124,6 +124,11 @@ A sphere appears instead of the flowery thingie.
 Synched the greets.
 4076.
 
+01/04/2025
+4073. 4067 unifying stuff.
+4064 adding stuff.
+
+
 
 
 

@@ -29,23 +29,21 @@ float newnoise(vec2 p)
                      dot( bskygrad( i+ivec2(1,1) ), f-vec2(1.0,1.0) ), u.x), u.y);
 }
 
-vec3 bskyFun(vec2 I)
+vec3 sphereHelper(vec3 O,vec2 I,int ver)
 {
-    vec3 O=zeero;
-
     float i=0,z;
     for(;i<1;i+=.005)
     {
         vec2 v=ir.xy,p=(I-v)/v.y*i;
-        z=max(1-dot(p,p),0);
+        z=max((ver==1?.05:1)-dot(p,p),0);
         p/=.2+sqrt(z);
         p+=ie*.1;
         v=abs(fract(p*newnoise(p*sin(ie*.01)))-.5)*newnoise(p*3);
         vec3 spherecol=ie<60?vec3(1,2,4):ie<66?vec3(4,2,1):vec3(2,3,1);
-        O+=spherecol/4e3*z/(abs(max(v.x*.5+v,v).y-.01)+.1-i*.1);
+        O+=spherecol/(ver==1?500:4e3)*z/(abs(max(v.x*.5+v,v).y-.01)+.1-i*.1);
     }
 
-    return tanh(O*O);
+    return ver==0?tanh(O*O):O;
 }
 
 //
@@ -147,19 +145,8 @@ void doLandscapeAndTri(vec2 p2,vec2 q2,vec3 rols,vec2 c)
 
     c.y+=ie<36?450-(ie-28)*50:0;
 
-    float i=0,z;
-    for(;i<1;i+=.005)
-    {
-        vec2 v=ir.xy,p=(2*c-v)/v.y*i;
-        z=max(.05-dot(p,p),0);
-        p/=.2+sqrt(z);
-        p+=ie*.1;
-        v=abs(fract(p*newnoise(p*sin(ie*.01)))-.5)*newnoise(p*3);
-        o.rgb+=vec3(1,2,4)/(i<36?500:4000)*z/(abs(max(v.x*.5+v,v).y-.01)+.1-i*.1);
-    }
-
-    // flare
-    o.rgb+=col/(1+distance(uv,light));
+    // sphere+flare
+    o.rgb=sphereHelper(o.rgb,2*c,1)+col/(1+distance(uv,light));
 }
 
 //
@@ -190,7 +177,7 @@ vec3 hexTransition(vec2 p,float m)
   float r = sdHex(hn+.25),sz=.25+.25*tanh(((r+hn.x + hn.y-4+m*8))),mm = smoothstep(0,0, -(hex(hp, sz)-sz)*.25);
   mm = mix(0.0, mm, smoothstep(0.0, 0.1, m));
   mm = mix(mm, 1.0, smoothstep(0.9, 1.0, m));
-  return mix(o.rgb, bskyFun(ggg), mm);
+  return mix(o.rgb, sphereHelper(zeero,ggg,0), mm);
 }
 
 // triangle trans
@@ -229,7 +216,7 @@ void main()
     }
     else if ((ie>=54)&&(ie<78))
     {
-        o.rgb=bskyFun(ggg);
+        o.rgb=sphereHelper(zeero,ggg,0);
     }
     // part 2
     else
