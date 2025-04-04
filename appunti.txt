@@ -128,6 +128,15 @@ Synched the greets.
 4073. 4067 unifying stuff.
 4064 adding stuff.
 
+02/04/2025
+wrighter&kb helping making it work on my crappy laptop videocard (discovered layout (location = x)).
+Font res is dynamic. 4068.
+
+03/04/2025
+Doing stuff. Adjusted sphere raise speed and flare position.
+4069.
+
+
 
 
 

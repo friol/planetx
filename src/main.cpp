@@ -92,7 +92,8 @@ int __cdecl main(int argc, char* argv[])
 	pidMain = ((PFNGLCREATESHADERPROGRAMVPROC)wglGetProcAddress("glCreateShaderProgramv"))(GL_FRAGMENT_SHADER, 1, &fragment_frag);
 
 	// init font
-	const HFONT mainFont = CreateFont(45, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ANTIALIASED_QUALITY, 0, "Arial");
+	//45:1920=x:xres x=(xres*45)/1920
+	const HFONT mainFont = CreateFont((p1 * 50) / 1920, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ANTIALIASED_QUALITY, 0, "Impact");
 	SelectObject(hDC, mainFont);
 	wglUseFontBitmaps(hDC, 0, 256, 0);
 
@@ -142,10 +143,10 @@ int __cdecl main(int argc, char* argv[])
 			//p0 += 22000;
 
 			((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidMain);
-			((PFNGLUNIFORM1IPROC)wglGetProcAddress("glUniform1i"))(((PFNGLGETUNIFORMLOCATIONPROC)wglGetProcAddress("glGetUniformLocation"))(pidMain, VAR_iTime), p0);
-			((PFNGLUNIFORM1IPROC)wglGetProcAddress("glUniform1i"))(((PFNGLGETUNIFORMLOCATIONPROC)wglGetProcAddress("glGetUniformLocation"))(pidMain, VAR_xrez), p1);
-			((PFNGLUNIFORM1IPROC)wglGetProcAddress("glUniform1i"))(((PFNGLGETUNIFORMLOCATIONPROC)wglGetProcAddress("glGetUniformLocation"))(pidMain, VAR_yrez), p2);
-			//glTexCoord3i(p0, p1, p2);
+			((PFNGLUNIFORM1IPROC)wglGetProcAddress("glUniform1i"))(0,p0);
+			((PFNGLUNIFORM1IPROC)wglGetProcAddress("glUniform1i"))(1,p1);
+			((PFNGLUNIFORM1IPROC)wglGetProcAddress("glUniform1i"))(2,p2);
+
 			glRects(-1, -1, 1, 1);
 
 #define NUM_TEXTS 13
@@ -159,7 +160,7 @@ int __cdecl main(int argc, char* argv[])
 				"MOD3M",
 				"FIZZER",
 				"KB",
-				"TRUCK",
+				"WRIGHTER",
 				"MERCURY",
 				"FUTURE CREW",
 				"FLOPINE",
@@ -170,7 +171,7 @@ int __cdecl main(int argc, char* argv[])
 			{
 				unsigned int pend = i == 0 ? 10000 : i == 1 ? 16000 : i == 2 ? 30000 : 77000;
 				unsigned int pstart = i < 3 ? (i + 1) * 6000 : 54000 + ((i - 3) * 1500);
-				float px = i == 0 ? 0.75f : i == 2 ? -0.15f : -0.95f;
+				float px = i == 0 ? 0.85f : i == 2 ? -0.075f : -0.95f;
 				float py = i == 0 ? -0.85f : i == 1 ? 0.75f : i==2?0.0f: 0.1f+((2.0f - (float)i)) * 0.1f;
 				if ((p0 >= pstart) && (p0 < pend))
 				{
