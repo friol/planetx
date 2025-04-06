@@ -7,8 +7,7 @@ layout (location = 1) uniform int xrez;
 layout (location = 2) uniform int yrez;
 
 out vec4 o;
-
-float ie=iTime/1e3;
+float ie;
 vec2 ir,xy,ggg;
 
 //
@@ -204,6 +203,7 @@ float fEquilateralTriangle(vec2 p,float r )
 
 void main() 
 {
+    ie=iTime/1e3;
     ir=vec2(xrez,yrez);
     xy=gl_FragCoord.xy-.5*ir;
     ggg=xy+.5*ir;
