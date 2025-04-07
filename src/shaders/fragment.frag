@@ -18,7 +18,7 @@ vec2 bskygrad(ivec2 z)
 {
     int n=z.x+z.y*21111;
     n=n*n*(n<<13)^n;
-    float g=(n*15+21+19)>>16;
+    float g=(n*15+40)>>16;
     return vec2(cos(g),sin(g));
 }
 
@@ -60,7 +60,7 @@ vec3 sphereHelper(vec3 O,vec2 I,int ver)
 
 float circle(vec2 uv,float blur,float a) 
 {
-    return smoothstep(0., blur, a - length(uv));
+    return smoothstep(0,blur,a-length(uv));
 }
 
 void doStarBackgroundAndPlanetZ(vec2 I)
@@ -68,7 +68,7 @@ void doStarBackgroundAndPlanetZ(vec2 I)
     // starback
     //vec4 oo=vec4(0);
     vec2 p,U=xy/ir.y;
-    for(float i=0.,f; i++<12;
+    for(float i=0,f; i++<12;
         o += (1e1-f)/max(length(p=mod((I+I-ir)/ir.y*f*
         mat2(rot(i)),3.)-1.)
         -vec4(.01),.01)/3e2)
@@ -122,7 +122,7 @@ vec3 landScape(vec3 ro, vec3 rd )
 {
     float t=2,dt=.1,c,f,i;
     vec3 col=vec3(0);
-    for (i=0;i<80;i++)
+    for (i=0;i++<80;)
     {                
         vec2 v = lscapefield(ro+t*rd);  
         c=v.x, f=v.y;
@@ -165,9 +165,9 @@ void doLandscapeAndTri(vec2 p2,vec2 q2,vec3 rols,vec2 c)
 float hex(vec2 p, float r) 
 {
   p.xy = p.yx;
-  vec3 k = vec3(-.86,.5,1.0/sqrt(3));
+  vec3 k = vec3(-.86,.5,1/sqrt(3));
   p = abs(p);
-  p -= 2*min(dot(k.xy,p),0.0)*k.xy;
+  p -= 2*min(dot(k.xy,p),0)*k.xy;
   p -= vec2(clamp(p.x, -k.z*r, k.z*r), r);
   return length(p);
 }
@@ -183,8 +183,8 @@ vec3 hexTransition(vec2 p,float m)
 {
   vec2 hp = 4*p,hn = hextile(hp)*.25*-vec2(-1., sqrt(3));
   float r = sdHex(hn+.25),sz=.25+.25*tanh(((r+hn.x + hn.y-4+m*8))),mm = smoothstep(0,0, -(hex(hp, sz)-sz)*.25);
-  mm = mix(0.0, mm, smoothstep(0.0, 0.1, m));
-  mm = mix(mm, 1.0, smoothstep(0.9, 1.0, m));
+  mm = mix(0, mm, smoothstep(0.0, 0.1, m));
+  mm = mix(mm, 1, smoothstep(0.9, 1.0, m));
   return mix(o.rgb, sphereHelper(vec3(0),ggg,0), mm);
 }
 
@@ -192,7 +192,7 @@ vec3 hexTransition(vec2 p,float m)
 
 float fEquilateralTriangle(vec2 p,float r )
 {
-    return -p.y-.5*sqrt(3)*max(abs(p.x)-sqrt(3)*p.y,0)+r*(1/sqrt(3));
+    return r*(1/sqrt(3))-p.y-.5*sqrt(3)*max(abs(p.x)-sqrt(3)*p.y,0);
 }
 
 //
