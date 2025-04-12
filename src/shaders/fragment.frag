@@ -41,14 +41,15 @@ vec3 sphereHelper(vec3 O,vec2 I,int ver)
         z=max((ver==1?.05:1)-dot(p,p),0);
         
         p/=.2+sqrt(z);
-        p+=ie*(ver==0?.1:.2);
+        p+=ie*(ver>0?.2:.1);
 
         v=abs(fract(p*newnoise(p*sin(ie*.01)))-.5)*newnoise(p*3);
         vec3 spherecol=ie<60?vec3(1,2,4):ie<66?vec3(4,2,1):vec3(2,3,1);
         O+=spherecol/(ver==1?5e2:4e3)*z/(abs(max(v.x*.5+v,v).y-.01)+.1-i*.1);
     }
 
-    return ver==0?tanh(O*O):clamp(O,0,1);
+    O=clamp(O,0,2);
+    return ver>0?O:tanh(O*O);
 }
 
 //

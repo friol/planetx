@@ -140,7 +140,7 @@ int __cdecl main(int argc, char* argv[])
 			glColor3ui(MMTime.u.sample, 0, 0);
 #endif
 
-			//p0 += 22000;
+			//p0 += 42000;
 
 			((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidMain);
 			((PFNGLUNIFORM1IPROC)wglGetProcAddress("glUniform1i"))(0,p0);
