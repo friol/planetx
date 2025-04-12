@@ -39,14 +39,16 @@ vec3 sphereHelper(vec3 O,vec2 I,int ver)
     {
         vec2 v=ir.xy,p=(I-v)/v.y*i;
         z=max((ver==1?.05:1)-dot(p,p),0);
+        
         p/=.2+sqrt(z);
-        p+=ie*.1;
+        p+=ie*(ver==0?.1:.2);
+
         v=abs(fract(p*newnoise(p*sin(ie*.01)))-.5)*newnoise(p*3);
         vec3 spherecol=ie<60?vec3(1,2,4):ie<66?vec3(4,2,1):vec3(2,3,1);
         O+=spherecol/(ver==1?5e2:4e3)*z/(abs(max(v.x*.5+v,v).y-.01)+.1-i*.1);
     }
 
-    return ver==0?tanh(O*O):O;
+    return ver==0?tanh(O*O):clamp(O,0,1);
 }
 
 //
@@ -68,10 +70,8 @@ void doStarBackgroundAndPlanetZ(vec2 I)
     // starback
     //vec4 oo=vec4(0);
     vec2 p,U=xy/ir.y;
-    for(float i=0,f; i++<12;
-        o += (1e1-f)/max(length(p=mod((I+I-ir)/ir.y*f*
-        mat2(rot(i)),3.)-1.)
-        -vec4(.01),.01)/3e2)
+    for(float i=0,f=0;i++<12;
+        o+=(1e1-f)/max(length(p=mod((I+I-ir)/ir.y*f*mat2(rot(i)),2.)-1.)-vec4(.01),.01)/3e2)
         f = mod(i-ie*.1,10);
 
     // planetZ
@@ -235,7 +235,7 @@ void main()
     // part 2
     else
     {
-        doLandscapeAndTri(pl,q,ie<36?vec3(0,2,2):ie>=42?vec3(0,3,.1):vec3(2,1,-2),ggg);
+        doLandscapeAndTri(pl,q,ie<36?vec3(0,2,2):ie<42?vec3(2,1,-2):ie<48?vec3(-3,.2,1):vec3(0,3,.1),ggg);
 
         if ((ie>=50)&&(ie<54))
         {

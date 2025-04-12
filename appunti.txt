@@ -136,9 +136,20 @@ Font res is dynamic. 4068.
 Doing stuff. Adjusted sphere raise speed and flare position.
 4069.
 
+08/04/2025
+One camera path more doesn't harm anyone.
+4080.
 
+10/04/2025
+Tested on CDS' hardware. No, not that one.
 
+11/04/2025
+That's it.
+4079.
 
+12/04/2025
+Are you sure?
+4093.
 
 
 moving stars (tiny)

@@ -1,0 +1,9 @@
+
+planet X
+4k
+by friol
+2o25
+
+@Revision orgas: uses the desktop's resolution; tested on NVidia RTX 2060, 4090 and also Intel integrated GPU
+contact me at dantonag (at) gmail dot com or on Discord (friol) for any issue
+thanks
