@@ -140,7 +140,7 @@ int __cdecl main(int argc, char* argv[])
 			glColor3ui(MMTime.u.sample, 0, 0);
 #endif
 
-			//p0 += 42000;
+			//p0 += 52000;
 
 			((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(pidMain);
 			((PFNGLUNIFORM1IPROC)wglGetProcAddress("glUniform1i"))(0,p0);
@@ -149,7 +149,7 @@ int __cdecl main(int argc, char* argv[])
 
 			glRects(-1, -1, 1, 1);
 
-#define NUM_TEXTS 15
+#define NUM_TEXTS 16
 			char* tlarr[NUM_TEXTS] =
 			{
 				"F R I O L",
@@ -161,6 +161,7 @@ int __cdecl main(int argc, char* argv[])
 				"FIZZER",
 				"KB",
 				"CDS",
+				"LFT",
 				"WRIGHTER",
 				"RAZDEE",
 				"MERCURY",
@@ -174,7 +175,7 @@ int __cdecl main(int argc, char* argv[])
 				unsigned int pend = i == 0 ? 10000 : i == 1 ? 16000 : i == 2 ? 30000 : 77000;
 				unsigned int pstart = i < 3 ? (i + 1) * 6000 : 54000 + ((i - 3) * 1500);
 				float px = i == 0 ? 0.85f : i == 2 ? -0.085f : -0.95f;
-				float py = i == 0 ? -0.85f : i == 1 ? 0.75f : i==2?-0.025f: 0.3f+((2.0f - (float)i)) * 0.1f;
+				float py = i == 0 ? -0.85f : i == 1 ? 0.75f : i==2?-0.025f: 0.4f+((2.0f - (float)i)) * 0.1f;
 				if ((p0 >= pstart) && (p0 < pend))
 				{
 					((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(0);
