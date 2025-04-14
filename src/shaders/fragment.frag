@@ -219,8 +219,11 @@ void main()
     vec2 q=xy/ir+.5,pl=ie<36?-1+2*q:-1.62 +2.72*q;
     pl.x*=ir.x/ir.y;
 
-    // part1/tri crossfade
-    if ((ie>=28)&&(ie<32))
+    if (ie<28)
+    {
+        doStarBackgroundAndPlanetZ(ggg);
+    }
+    else if (ie<32)
     {
         doStarBackgroundAndPlanetZ(ggg);
 
@@ -229,17 +232,7 @@ void main()
             doLandscapeAndTri(pl,q,vec3(0,2,2),ggg);
         }
     }
-    // part 1/4,stars+planet
-    else if ((ie<32)||(ie>=78))
-    {
-        doStarBackgroundAndPlanetZ(ggg);
-    }
-    else if ((ie>=54)&&(ie<78))
-    {
-        o.rgb=sphereHelper(vec3(0),ggg,0);
-    }
-    // part 2
-    else
+    else if (ie<54)
     {
         doLandscapeAndTri(pl,q,ie<36?vec3(0,2,2):ie<42?vec3(2,1,-2):ie<48?vec3(-3,.2,1):vec3(0,3,.1),ggg);
 
@@ -247,6 +240,14 @@ void main()
         {
             o.rgb = hexTransition(pl,(ie-50)*.25);
         }
+    }
+    else if (ie<78)
+    {
+        o.rgb=sphereHelper(vec3(0),ggg,0);
+    }
+    else
+    {
+        doStarBackgroundAndPlanetZ(ggg);
     }
 
     // fadein
